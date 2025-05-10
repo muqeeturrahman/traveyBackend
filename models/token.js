@@ -30,12 +30,13 @@ const tokenSchema = new Schema(
     scope: {
       type: String,
     },
-       createdAt: {
+    createdAt: {
       type: Date,
+      require: true
     },
   },
   {
-    timestamps: true, 
+    timestamps: true,
   }
 );
 

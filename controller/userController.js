@@ -5,25 +5,30 @@ import tokenModel from "../models/token.js"
 dotenv.config()
 
 const getAccessToken = async () => {
-  const tokenData = await tokenModel.findOne({}).sort({ createdAt: -1 });
-  console.log(tokenData,"token>>>>>>>>>>>>");
-  
+  const tokenData = await tokenModel.findOne({}).sort({ updatedAt: -1 }); // Using updatedAt now
+  console.log(tokenData, "token>>>>>>>>>>>>");
 
-  
-if (!tokenData) {
+  if (!tokenData) {
     throw new Error("No token found");
   }
 
-  const now = Date.now();
-  const nowInSeconds = Math.floor(now / 1000);
-  const createdAtInSeconds = Math.floor(new Date(tokenData.createdAt).getTime() / 1000);
-  const expiryTime = createdAtInSeconds + tokenData.expiresAt;
+  const nowInSeconds = Math.floor(Date.now() / 1000);
+  const updatedAtInSeconds = Math.floor(new Date(tokenData.updatedAt).getTime() / 1000);
+  const expiryTime = updatedAtInSeconds + tokenData.expiresAt;
+
+  console.log({
+    nowInSeconds,
+    updatedAtInSeconds,
+    expiryTime,
+    secondsUntilExpiry: expiryTime - nowInSeconds,
+  });
 
   if (tokenData.access_token && expiryTime > nowInSeconds) {
-    console.log("already token>>>>>>>>>>");
-    
+    console.log("✅ Reusing valid token");
     return tokenData.access_token;
   } else {
+    console.log("🔄 Token expired or missing, fetching new token...");
+
     const response = await axios.post(
       'https://test.api.amadeus.com/v1/security/oauth2/token',
       new URLSearchParams({
@@ -39,40 +44,39 @@ if (!tokenData) {
     const newAccessToken = response.data.access_token;
     const newExpiresIn = response.data.expires_in;
 
-    // Update token in DB
+    // Update token in DB and let Mongoose auto-update updatedAt
     await tokenModel.findByIdAndUpdate(tokenData._id, {
       access_token: newAccessToken,
       expiresAt: newExpiresIn,
-      createdAt: new Date() // Force update createdAt
     });
 
     return newAccessToken;
   }
 };
+
 export const flightOffers = async (req, res, next) => {
   try {
     // ✅ Get valid token (will refresh if needed)
-    const token = await getAccessToken()
+    const token = await getAccessToken();
     console.log("✅ Token used:", token);
 
-    const { originLocationCode, destinationLocationCode, departureDate, adults,max } = req.body;
-console.log(originLocationCode,">>>>>");
-
+    const { originLocationCode, destinationLocationCode, departureDate, adults, max } = req.body;
+    console.log(originLocationCode, ">>>>>>");
 
     const response = await axios.get(
       "https://test.api.amadeus.com/v2/shopping/flight-offers",
       {
         params: {
-          originLocationCode: originLocationCode,
-          destinationLocationCode: destinationLocationCode,
-          departureDate: departureDate,
+          originLocationCode,
+          destinationLocationCode,
+          departureDate,
           adults: adults || 1,
           currencyCode: "USD",
-          max: max,
+          max,
         },
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json", // optional but good to include
+          "Content-Type": "application/json",
         },
       }
     );
