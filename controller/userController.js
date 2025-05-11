@@ -2,6 +2,7 @@ import express from "express"
 import axios from "axios"
 import dotenv from "dotenv"
 import tokenModel from "../models/token.js"
+import bookingModel from "../models/bookingModel.js"
 dotenv.config()
 
 const getAccessToken = async () => {
@@ -57,32 +58,2336 @@ const getAccessToken = async () => {
 export const flightOffers = async (req, res, next) => {
   try {
     // ✅ Get valid token (will refresh if needed)
-    const token = await getAccessToken();
-    console.log("✅ Token used:", token);
+    // const token = await getAccessToken();
+    // console.log("✅ Token used:", token);
 
-    const { originLocationCode, destinationLocationCode, departureDate, adults, max } = req.body;
-    console.log(originLocationCode, ">>>>>>");
+    // const { originLocationCode, destinationLocationCode, departureDate, adults, max } = req.body;
+    // console.log(originLocationCode, ">>>>>>");
 
-    const response = await axios.get(
-      "https://test.api.amadeus.com/v2/shopping/flight-offers",
-      {
-        params: {
-          originLocationCode,
-          destinationLocationCode,
-          departureDate,
-          adults: adults || 1,
-          currencyCode: "USD",
-          max,
+    // const response = await axios.get(
+    //   "https://test.api.amadeus.com/v2/shopping/flight-offers",
+    //   {
+    //     params: {
+    //       originLocationCode,
+    //       destinationLocationCode,
+    //       departureDate,
+    //       adults: adults || 1,
+    //       currencyCode: "USD",
+    //       max,
+    //     },
+    //     headers: {
+    //       Authorization: `Bearer ${token}`,
+    //       "Content-Type": "application/json",
+    //     },
+    //   }
+    // );
+let data={
+    "data": {
+        "meta": {
+            "count": 5,
+            "links": {
+                "self": "https://test.api.amadeus.com/v2/shopping/flight-offers?originLocationCode=SYD&destinationLocationCode=NYC&departureDate=2025-05-25&adults=3&currencyCode=USD&max=5"
+            }
         },
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+        "data": [
+            {
+                "type": "flight-offer",
+                "id": "1",
+                "source": "GDS",
+                "instantTicketingRequired": false,
+                "nonHomogeneous": false,
+                "oneWay": false,
+                "isUpsellOffer": false,
+                "lastTicketingDate": "2025-05-25",
+                "lastTicketingDateTime": "2025-05-25",
+                "numberOfBookableSeats": 9,
+                "itineraries": [
+                    {
+                        "duration": "PT27H30M",
+                        "segments": [
+                            {
+                                "departure": {
+                                    "iataCode": "SYD",
+                                    "terminal": "1",
+                                    "at": "2025-05-25T09:30:00"
+                                },
+                                "arrival": {
+                                    "iataCode": "ICN",
+                                    "terminal": "1",
+                                    "at": "2025-05-25T19:00:00"
+                                },
+                                "carrierCode": "OZ",
+                                "number": "602",
+                                "aircraft": {
+                                    "code": "359"
+                                },
+                                "operating": {
+                                    "carrierCode": "OZ"
+                                },
+                                "duration": "PT10H30M",
+                                "id": "5",
+                                "numberOfStops": 0,
+                                "blacklistedInEU": false
+                            },
+                            {
+                                "departure": {
+                                    "iataCode": "ICN",
+                                    "terminal": "1",
+                                    "at": "2025-05-25T21:05:00"
+                                },
+                                "arrival": {
+                                    "iataCode": "JFK",
+                                    "terminal": "1",
+                                    "at": "2025-05-25T23:00:00"
+                                },
+                                "carrierCode": "OZ",
+                                "number": "224",
+                                "aircraft": {
+                                    "code": "359"
+                                },
+                                "operating": {
+                                    "carrierCode": "OZ"
+                                },
+                                "duration": "PT14H55M",
+                                "id": "6",
+                                "numberOfStops": 0,
+                                "blacklistedInEU": false
+                            }
+                        ]
+                    }
+                ],
+                "price": {
+                    "currency": "USD",
+                    "total": "2570.43",
+                    "base": "1821.00",
+                    "fees": [
+                        {
+                            "amount": "0.00",
+                            "type": "SUPPLIER"
+                        },
+                        {
+                            "amount": "0.00",
+                            "type": "TICKETING"
+                        }
+                    ],
+                    "grandTotal": "2570.43"
+                },
+                "pricingOptions": {
+                    "fareType": [
+                        "PUBLISHED"
+                    ],
+                    "includedCheckedBagsOnly": true
+                },
+                "validatingAirlineCodes": [
+                    "OZ"
+                ],
+                "travelerPricings": [
+                    {
+                        "travelerId": "1",
+                        "fareOption": "STANDARD",
+                        "travelerType": "ADULT",
+                        "price": {
+                            "currency": "USD",
+                            "total": "856.81",
+                            "base": "607.00"
+                        },
+                        "fareDetailsBySegment": [
+                            {
+                                "segmentId": "5",
+                                "cabin": "ECONOMY",
+                                "fareBasis": "KLOOU",
+                                "class": "K",
+                                "includedCheckedBags": {
+                                    "quantity": 2
+                                },
+                                "includedCabinBags": {
+                                    "quantity": 1
+                                }
+                            },
+                            {
+                                "segmentId": "6",
+                                "cabin": "ECONOMY",
+                                "fareBasis": "KLOOU",
+                                "class": "K",
+                                "includedCheckedBags": {
+                                    "quantity": 2
+                                },
+                                "includedCabinBags": {
+                                    "quantity": 1
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "travelerId": "2",
+                        "fareOption": "STANDARD",
+                        "travelerType": "ADULT",
+                        "price": {
+                            "currency": "USD",
+                            "total": "856.81",
+                            "base": "607.00"
+                        },
+                        "fareDetailsBySegment": [
+                            {
+                                "segmentId": "5",
+                                "cabin": "ECONOMY",
+                                "fareBasis": "KLOOU",
+                                "class": "K",
+                                "includedCheckedBags": {
+                                    "quantity": 2
+                                },
+                                "includedCabinBags": {
+                                    "quantity": 1
+                                }
+                            },
+                            {
+                                "segmentId": "6",
+                                "cabin": "ECONOMY",
+                                "fareBasis": "KLOOU",
+                                "class": "K",
+                                "includedCheckedBags": {
+                                    "quantity": 2
+                                },
+                                "includedCabinBags": {
+                                    "quantity": 1
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "travelerId": "3",
+                        "fareOption": "STANDARD",
+                        "travelerType": "ADULT",
+                        "price": {
+                            "currency": "USD",
+                            "total": "856.81",
+                            "base": "607.00"
+                        },
+                        "fareDetailsBySegment": [
+                            {
+                                "segmentId": "5",
+                                "cabin": "ECONOMY",
+                                "fareBasis": "KLOOU",
+                                "class": "K",
+                                "includedCheckedBags": {
+                                    "quantity": 2
+                                },
+                                "includedCabinBags": {
+                                    "quantity": 1
+                                }
+                            },
+                            {
+                                "segmentId": "6",
+                                "cabin": "ECONOMY",
+                                "fareBasis": "KLOOU",
+                                "class": "K",
+                                "includedCheckedBags": {
+                                    "quantity": 2
+                                },
+                                "includedCabinBags": {
+                                    "quantity": 1
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "type": "flight-offer",
+                "id": "2",
+                "source": "GDS",
+                "instantTicketingRequired": false,
+                "nonHomogeneous": false,
+                "oneWay": false,
+                "isUpsellOffer": false,
+                "lastTicketingDate": "2025-05-25",
+                "lastTicketingDateTime": "2025-05-25",
+                "numberOfBookableSeats": 9,
+                "itineraries": [
+                    {
+                        "duration": "PT27H",
+                        "segments": [
+                            {
+                                "departure": {
+                                    "iataCode": "SYD",
+                                    "terminal": "1",
+                                    "at": "2025-05-25T07:35:00"
+                                },
+                                "arrival": {
+                                    "iataCode": "HKG",
+                                    "terminal": "1",
+                                    "at": "2025-05-25T15:05:00"
+                                },
+                                "carrierCode": "CX",
+                                "number": "110",
+                                "aircraft": {
+                                    "code": "359"
+                                },
+                                "operating": {
+                                    "carrierCode": "CX"
+                                },
+                                "duration": "PT9H30M",
+                                "id": "1",
+                                "numberOfStops": 0,
+                                "blacklistedInEU": false
+                            },
+                            {
+                                "departure": {
+                                    "iataCode": "HKG",
+                                    "terminal": "1",
+                                    "at": "2025-05-25T16:15:00"
+                                },
+                                "arrival": {
+                                    "iataCode": "JFK",
+                                    "terminal": "8",
+                                    "at": "2025-05-25T20:35:00"
+                                },
+                                "carrierCode": "CX",
+                                "number": "840",
+                                "aircraft": {
+                                    "code": "359"
+                                },
+                                "operating": {
+                                    "carrierCode": "CX"
+                                },
+                                "duration": "PT16H20M",
+                                "id": "2",
+                                "numberOfStops": 0,
+                                "blacklistedInEU": false
+                            }
+                        ]
+                    }
+                ],
+                "price": {
+                    "currency": "USD",
+                    "total": "2590.53",
+                    "base": "1611.00",
+                    "fees": [
+                        {
+                            "amount": "0.00",
+                            "type": "SUPPLIER"
+                        },
+                        {
+                            "amount": "0.00",
+                            "type": "TICKETING"
+                        }
+                    ],
+                    "grandTotal": "2590.53"
+                },
+                "pricingOptions": {
+                    "fareType": [
+                        "PUBLISHED"
+                    ],
+                    "includedCheckedBagsOnly": true
+                },
+                "validatingAirlineCodes": [
+                    "CX"
+                ],
+                "travelerPricings": [
+                    {
+                        "travelerId": "1",
+                        "fareOption": "STANDARD",
+                        "travelerType": "ADULT",
+                        "price": {
+                            "currency": "USD",
+                            "total": "863.51",
+                            "base": "537.00"
+                        },
+                        "fareDetailsBySegment": [
+                            {
+                                "segmentId": "1",
+                                "cabin": "ECONOMY",
+                                "fareBasis": "NR21AUKO",
+                                "brandedFare": "ECONLIGHT",
+                                "brandedFareLabel": "ECONOMY LIGHT",
+                                "class": "N",
+                                "includedCheckedBags": {
+                                    "quantity": 1
+                                },
+                                "includedCabinBags": {
+                                    "quantity": 1
+                                },
+                                "amenities": [
+                                    {
+                                        "description": "1PC MAX 23KG 158LCM EACH",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "1PC MAX 15LB 7KG 115LCM",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "SEAT ASSIGNMENT",
+                                        "isChargeable": true,
+                                        "amenityType": "PRE_RESERVED_SEAT",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "REFUNDABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "MILEAGE ACCRUAL",
+                                        "isChargeable": false,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "CHANGEABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "segmentId": "2",
+                                "cabin": "ECONOMY",
+                                "fareBasis": "NR21AUKO",
+                                "brandedFare": "ECONLIGHT",
+                                "brandedFareLabel": "ECONOMY LIGHT",
+                                "class": "N",
+                                "includedCheckedBags": {
+                                    "quantity": 1
+                                },
+                                "includedCabinBags": {
+                                    "quantity": 1
+                                },
+                                "amenities": [
+                                    {
+                                        "description": "1PC MAX 23KG 158LCM EACH",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "1PC MAX 15LB 7KG 115LCM",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "SEAT ASSIGNMENT",
+                                        "isChargeable": true,
+                                        "amenityType": "PRE_RESERVED_SEAT",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "REFUNDABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "MILEAGE ACCRUAL",
+                                        "isChargeable": false,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "CHANGEABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "travelerId": "2",
+                        "fareOption": "STANDARD",
+                        "travelerType": "ADULT",
+                        "price": {
+                            "currency": "USD",
+                            "total": "863.51",
+                            "base": "537.00"
+                        },
+                        "fareDetailsBySegment": [
+                            {
+                                "segmentId": "1",
+                                "cabin": "ECONOMY",
+                                "fareBasis": "NR21AUKO",
+                                "brandedFare": "ECONLIGHT",
+                                "brandedFareLabel": "ECONOMY LIGHT",
+                                "class": "N",
+                                "includedCheckedBags": {
+                                    "quantity": 1
+                                },
+                                "includedCabinBags": {
+                                    "quantity": 1
+                                },
+                                "amenities": [
+                                    {
+                                        "description": "1PC MAX 23KG 158LCM EACH",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "1PC MAX 15LB 7KG 115LCM",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "SEAT ASSIGNMENT",
+                                        "isChargeable": true,
+                                        "amenityType": "PRE_RESERVED_SEAT",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "REFUNDABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "MILEAGE ACCRUAL",
+                                        "isChargeable": false,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "CHANGEABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "segmentId": "2",
+                                "cabin": "ECONOMY",
+                                "fareBasis": "NR21AUKO",
+                                "brandedFare": "ECONLIGHT",
+                                "brandedFareLabel": "ECONOMY LIGHT",
+                                "class": "N",
+                                "includedCheckedBags": {
+                                    "quantity": 1
+                                },
+                                "includedCabinBags": {
+                                    "quantity": 1
+                                },
+                                "amenities": [
+                                    {
+                                        "description": "1PC MAX 23KG 158LCM EACH",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "1PC MAX 15LB 7KG 115LCM",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "SEAT ASSIGNMENT",
+                                        "isChargeable": true,
+                                        "amenityType": "PRE_RESERVED_SEAT",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "REFUNDABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "MILEAGE ACCRUAL",
+                                        "isChargeable": false,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "CHANGEABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "travelerId": "3",
+                        "fareOption": "STANDARD",
+                        "travelerType": "ADULT",
+                        "price": {
+                            "currency": "USD",
+                            "total": "863.51",
+                            "base": "537.00"
+                        },
+                        "fareDetailsBySegment": [
+                            {
+                                "segmentId": "1",
+                                "cabin": "ECONOMY",
+                                "fareBasis": "NR21AUKO",
+                                "brandedFare": "ECONLIGHT",
+                                "brandedFareLabel": "ECONOMY LIGHT",
+                                "class": "N",
+                                "includedCheckedBags": {
+                                    "quantity": 1
+                                },
+                                "includedCabinBags": {
+                                    "quantity": 1
+                                },
+                                "amenities": [
+                                    {
+                                        "description": "1PC MAX 23KG 158LCM EACH",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "1PC MAX 15LB 7KG 115LCM",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "SEAT ASSIGNMENT",
+                                        "isChargeable": true,
+                                        "amenityType": "PRE_RESERVED_SEAT",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "REFUNDABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "MILEAGE ACCRUAL",
+                                        "isChargeable": false,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "CHANGEABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "segmentId": "2",
+                                "cabin": "ECONOMY",
+                                "fareBasis": "NR21AUKO",
+                                "brandedFare": "ECONLIGHT",
+                                "brandedFareLabel": "ECONOMY LIGHT",
+                                "class": "N",
+                                "includedCheckedBags": {
+                                    "quantity": 1
+                                },
+                                "includedCabinBags": {
+                                    "quantity": 1
+                                },
+                                "amenities": [
+                                    {
+                                        "description": "1PC MAX 23KG 158LCM EACH",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "1PC MAX 15LB 7KG 115LCM",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "SEAT ASSIGNMENT",
+                                        "isChargeable": true,
+                                        "amenityType": "PRE_RESERVED_SEAT",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "REFUNDABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "MILEAGE ACCRUAL",
+                                        "isChargeable": false,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "CHANGEABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "type": "flight-offer",
+                "id": "3",
+                "source": "GDS",
+                "instantTicketingRequired": false,
+                "nonHomogeneous": false,
+                "oneWay": false,
+                "isUpsellOffer": false,
+                "lastTicketingDate": "2025-05-25",
+                "lastTicketingDateTime": "2025-05-25",
+                "numberOfBookableSeats": 9,
+                "itineraries": [
+                    {
+                        "duration": "PT29H55M",
+                        "segments": [
+                            {
+                                "departure": {
+                                    "iataCode": "SYD",
+                                    "terminal": "1",
+                                    "at": "2025-05-25T14:05:00"
+                                },
+                                "arrival": {
+                                    "iataCode": "HKG",
+                                    "terminal": "1",
+                                    "at": "2025-05-25T21:30:00"
+                                },
+                                "carrierCode": "CX",
+                                "number": "100",
+                                "aircraft": {
+                                    "code": "359"
+                                },
+                                "operating": {
+                                    "carrierCode": "CX"
+                                },
+                                "duration": "PT9H25M",
+                                "id": "7",
+                                "numberOfStops": 0,
+                                "blacklistedInEU": false
+                            },
+                            {
+                                "departure": {
+                                    "iataCode": "HKG",
+                                    "terminal": "1",
+                                    "at": "2025-05-26T02:00:00"
+                                },
+                                "arrival": {
+                                    "iataCode": "JFK",
+                                    "terminal": "8",
+                                    "at": "2025-05-26T06:00:00"
+                                },
+                                "carrierCode": "CX",
+                                "number": "844",
+                                "aircraft": {
+                                    "code": "359"
+                                },
+                                "operating": {
+                                    "carrierCode": "CX"
+                                },
+                                "duration": "PT16H",
+                                "id": "8",
+                                "numberOfStops": 0,
+                                "blacklistedInEU": false
+                            }
+                        ]
+                    }
+                ],
+                "price": {
+                    "currency": "USD",
+                    "total": "2590.53",
+                    "base": "1611.00",
+                    "fees": [
+                        {
+                            "amount": "0.00",
+                            "type": "SUPPLIER"
+                        },
+                        {
+                            "amount": "0.00",
+                            "type": "TICKETING"
+                        }
+                    ],
+                    "grandTotal": "2590.53"
+                },
+                "pricingOptions": {
+                    "fareType": [
+                        "PUBLISHED"
+                    ],
+                    "includedCheckedBagsOnly": true
+                },
+                "validatingAirlineCodes": [
+                    "CX"
+                ],
+                "travelerPricings": [
+                    {
+                        "travelerId": "1",
+                        "fareOption": "STANDARD",
+                        "travelerType": "ADULT",
+                        "price": {
+                            "currency": "USD",
+                            "total": "863.51",
+                            "base": "537.00"
+                        },
+                        "fareDetailsBySegment": [
+                            {
+                                "segmentId": "7",
+                                "cabin": "ECONOMY",
+                                "fareBasis": "NR21AUKO",
+                                "brandedFare": "ECONLIGHT",
+                                "brandedFareLabel": "ECONOMY LIGHT",
+                                "class": "N",
+                                "includedCheckedBags": {
+                                    "quantity": 1
+                                },
+                                "includedCabinBags": {
+                                    "quantity": 1
+                                },
+                                "amenities": [
+                                    {
+                                        "description": "1PC MAX 23KG 158LCM EACH",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "1PC MAX 15LB 7KG 115LCM",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "SEAT ASSIGNMENT",
+                                        "isChargeable": true,
+                                        "amenityType": "PRE_RESERVED_SEAT",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "REFUNDABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "MILEAGE ACCRUAL",
+                                        "isChargeable": false,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "CHANGEABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "segmentId": "8",
+                                "cabin": "ECONOMY",
+                                "fareBasis": "NR21AUKO",
+                                "brandedFare": "ECONLIGHT",
+                                "brandedFareLabel": "ECONOMY LIGHT",
+                                "class": "N",
+                                "includedCheckedBags": {
+                                    "quantity": 1
+                                },
+                                "includedCabinBags": {
+                                    "quantity": 1
+                                },
+                                "amenities": [
+                                    {
+                                        "description": "1PC MAX 23KG 158LCM EACH",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "1PC MAX 15LB 7KG 115LCM",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "SEAT ASSIGNMENT",
+                                        "isChargeable": true,
+                                        "amenityType": "PRE_RESERVED_SEAT",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "REFUNDABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "MILEAGE ACCRUAL",
+                                        "isChargeable": false,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "CHANGEABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "travelerId": "2",
+                        "fareOption": "STANDARD",
+                        "travelerType": "ADULT",
+                        "price": {
+                            "currency": "USD",
+                            "total": "863.51",
+                            "base": "537.00"
+                        },
+                        "fareDetailsBySegment": [
+                            {
+                                "segmentId": "7",
+                                "cabin": "ECONOMY",
+                                "fareBasis": "NR21AUKO",
+                                "brandedFare": "ECONLIGHT",
+                                "brandedFareLabel": "ECONOMY LIGHT",
+                                "class": "N",
+                                "includedCheckedBags": {
+                                    "quantity": 1
+                                },
+                                "includedCabinBags": {
+                                    "quantity": 1
+                                },
+                                "amenities": [
+                                    {
+                                        "description": "1PC MAX 23KG 158LCM EACH",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "1PC MAX 15LB 7KG 115LCM",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "SEAT ASSIGNMENT",
+                                        "isChargeable": true,
+                                        "amenityType": "PRE_RESERVED_SEAT",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "REFUNDABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "MILEAGE ACCRUAL",
+                                        "isChargeable": false,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "CHANGEABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "segmentId": "8",
+                                "cabin": "ECONOMY",
+                                "fareBasis": "NR21AUKO",
+                                "brandedFare": "ECONLIGHT",
+                                "brandedFareLabel": "ECONOMY LIGHT",
+                                "class": "N",
+                                "includedCheckedBags": {
+                                    "quantity": 1
+                                },
+                                "includedCabinBags": {
+                                    "quantity": 1
+                                },
+                                "amenities": [
+                                    {
+                                        "description": "1PC MAX 23KG 158LCM EACH",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "1PC MAX 15LB 7KG 115LCM",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "SEAT ASSIGNMENT",
+                                        "isChargeable": true,
+                                        "amenityType": "PRE_RESERVED_SEAT",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "REFUNDABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "MILEAGE ACCRUAL",
+                                        "isChargeable": false,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "CHANGEABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "travelerId": "3",
+                        "fareOption": "STANDARD",
+                        "travelerType": "ADULT",
+                        "price": {
+                            "currency": "USD",
+                            "total": "863.51",
+                            "base": "537.00"
+                        },
+                        "fareDetailsBySegment": [
+                            {
+                                "segmentId": "7",
+                                "cabin": "ECONOMY",
+                                "fareBasis": "NR21AUKO",
+                                "brandedFare": "ECONLIGHT",
+                                "brandedFareLabel": "ECONOMY LIGHT",
+                                "class": "N",
+                                "includedCheckedBags": {
+                                    "quantity": 1
+                                },
+                                "includedCabinBags": {
+                                    "quantity": 1
+                                },
+                                "amenities": [
+                                    {
+                                        "description": "1PC MAX 23KG 158LCM EACH",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "1PC MAX 15LB 7KG 115LCM",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "SEAT ASSIGNMENT",
+                                        "isChargeable": true,
+                                        "amenityType": "PRE_RESERVED_SEAT",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "REFUNDABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "MILEAGE ACCRUAL",
+                                        "isChargeable": false,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "CHANGEABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "segmentId": "8",
+                                "cabin": "ECONOMY",
+                                "fareBasis": "NR21AUKO",
+                                "brandedFare": "ECONLIGHT",
+                                "brandedFareLabel": "ECONOMY LIGHT",
+                                "class": "N",
+                                "includedCheckedBags": {
+                                    "quantity": 1
+                                },
+                                "includedCabinBags": {
+                                    "quantity": 1
+                                },
+                                "amenities": [
+                                    {
+                                        "description": "1PC MAX 23KG 158LCM EACH",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "1PC MAX 15LB 7KG 115LCM",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "SEAT ASSIGNMENT",
+                                        "isChargeable": true,
+                                        "amenityType": "PRE_RESERVED_SEAT",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "REFUNDABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "MILEAGE ACCRUAL",
+                                        "isChargeable": false,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "CHANGEABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "type": "flight-offer",
+                "id": "4",
+                "source": "GDS",
+                "instantTicketingRequired": false,
+                "nonHomogeneous": false,
+                "oneWay": false,
+                "isUpsellOffer": false,
+                "lastTicketingDate": "2025-05-25",
+                "lastTicketingDateTime": "2025-05-25",
+                "numberOfBookableSeats": 9,
+                "itineraries": [
+                    {
+                        "duration": "PT33H55M",
+                        "segments": [
+                            {
+                                "departure": {
+                                    "iataCode": "SYD",
+                                    "terminal": "1",
+                                    "at": "2025-05-25T10:05:00"
+                                },
+                                "arrival": {
+                                    "iataCode": "HKG",
+                                    "terminal": "1",
+                                    "at": "2025-05-25T17:35:00"
+                                },
+                                "carrierCode": "CX",
+                                "number": "162",
+                                "aircraft": {
+                                    "code": "359"
+                                },
+                                "operating": {
+                                    "carrierCode": "CX"
+                                },
+                                "duration": "PT9H30M",
+                                "id": "9",
+                                "numberOfStops": 0,
+                                "blacklistedInEU": false
+                            },
+                            {
+                                "departure": {
+                                    "iataCode": "HKG",
+                                    "terminal": "1",
+                                    "at": "2025-05-26T02:00:00"
+                                },
+                                "arrival": {
+                                    "iataCode": "JFK",
+                                    "terminal": "8",
+                                    "at": "2025-05-26T06:00:00"
+                                },
+                                "carrierCode": "CX",
+                                "number": "844",
+                                "aircraft": {
+                                    "code": "359"
+                                },
+                                "operating": {
+                                    "carrierCode": "CX"
+                                },
+                                "duration": "PT16H",
+                                "id": "10",
+                                "numberOfStops": 0,
+                                "blacklistedInEU": false
+                            }
+                        ]
+                    }
+                ],
+                "price": {
+                    "currency": "USD",
+                    "total": "2590.53",
+                    "base": "1611.00",
+                    "fees": [
+                        {
+                            "amount": "0.00",
+                            "type": "SUPPLIER"
+                        },
+                        {
+                            "amount": "0.00",
+                            "type": "TICKETING"
+                        }
+                    ],
+                    "grandTotal": "2590.53"
+                },
+                "pricingOptions": {
+                    "fareType": [
+                        "PUBLISHED"
+                    ],
+                    "includedCheckedBagsOnly": true
+                },
+                "validatingAirlineCodes": [
+                    "CX"
+                ],
+                "travelerPricings": [
+                    {
+                        "travelerId": "1",
+                        "fareOption": "STANDARD",
+                        "travelerType": "ADULT",
+                        "price": {
+                            "currency": "USD",
+                            "total": "863.51",
+                            "base": "537.00"
+                        },
+                        "fareDetailsBySegment": [
+                            {
+                                "segmentId": "9",
+                                "cabin": "ECONOMY",
+                                "fareBasis": "NR21AUKO",
+                                "brandedFare": "ECONLIGHT",
+                                "brandedFareLabel": "ECONOMY LIGHT",
+                                "class": "N",
+                                "includedCheckedBags": {
+                                    "quantity": 1
+                                },
+                                "includedCabinBags": {
+                                    "quantity": 1
+                                },
+                                "amenities": [
+                                    {
+                                        "description": "1PC MAX 23KG 158LCM EACH",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "1PC MAX 15LB 7KG 115LCM",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "SEAT ASSIGNMENT",
+                                        "isChargeable": true,
+                                        "amenityType": "PRE_RESERVED_SEAT",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "REFUNDABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "MILEAGE ACCRUAL",
+                                        "isChargeable": false,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "CHANGEABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "segmentId": "10",
+                                "cabin": "ECONOMY",
+                                "fareBasis": "NR21AUKO",
+                                "brandedFare": "ECONLIGHT",
+                                "brandedFareLabel": "ECONOMY LIGHT",
+                                "class": "N",
+                                "includedCheckedBags": {
+                                    "quantity": 1
+                                },
+                                "includedCabinBags": {
+                                    "quantity": 1
+                                },
+                                "amenities": [
+                                    {
+                                        "description": "1PC MAX 23KG 158LCM EACH",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "1PC MAX 15LB 7KG 115LCM",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "SEAT ASSIGNMENT",
+                                        "isChargeable": true,
+                                        "amenityType": "PRE_RESERVED_SEAT",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "REFUNDABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "MILEAGE ACCRUAL",
+                                        "isChargeable": false,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "CHANGEABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "travelerId": "2",
+                        "fareOption": "STANDARD",
+                        "travelerType": "ADULT",
+                        "price": {
+                            "currency": "USD",
+                            "total": "863.51",
+                            "base": "537.00"
+                        },
+                        "fareDetailsBySegment": [
+                            {
+                                "segmentId": "9",
+                                "cabin": "ECONOMY",
+                                "fareBasis": "NR21AUKO",
+                                "brandedFare": "ECONLIGHT",
+                                "brandedFareLabel": "ECONOMY LIGHT",
+                                "class": "N",
+                                "includedCheckedBags": {
+                                    "quantity": 1
+                                },
+                                "includedCabinBags": {
+                                    "quantity": 1
+                                },
+                                "amenities": [
+                                    {
+                                        "description": "1PC MAX 23KG 158LCM EACH",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "1PC MAX 15LB 7KG 115LCM",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "SEAT ASSIGNMENT",
+                                        "isChargeable": true,
+                                        "amenityType": "PRE_RESERVED_SEAT",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "REFUNDABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "MILEAGE ACCRUAL",
+                                        "isChargeable": false,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "CHANGEABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "segmentId": "10",
+                                "cabin": "ECONOMY",
+                                "fareBasis": "NR21AUKO",
+                                "brandedFare": "ECONLIGHT",
+                                "brandedFareLabel": "ECONOMY LIGHT",
+                                "class": "N",
+                                "includedCheckedBags": {
+                                    "quantity": 1
+                                },
+                                "includedCabinBags": {
+                                    "quantity": 1
+                                },
+                                "amenities": [
+                                    {
+                                        "description": "1PC MAX 23KG 158LCM EACH",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "1PC MAX 15LB 7KG 115LCM",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "SEAT ASSIGNMENT",
+                                        "isChargeable": true,
+                                        "amenityType": "PRE_RESERVED_SEAT",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "REFUNDABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "MILEAGE ACCRUAL",
+                                        "isChargeable": false,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "CHANGEABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "travelerId": "3",
+                        "fareOption": "STANDARD",
+                        "travelerType": "ADULT",
+                        "price": {
+                            "currency": "USD",
+                            "total": "863.51",
+                            "base": "537.00"
+                        },
+                        "fareDetailsBySegment": [
+                            {
+                                "segmentId": "9",
+                                "cabin": "ECONOMY",
+                                "fareBasis": "NR21AUKO",
+                                "brandedFare": "ECONLIGHT",
+                                "brandedFareLabel": "ECONOMY LIGHT",
+                                "class": "N",
+                                "includedCheckedBags": {
+                                    "quantity": 1
+                                },
+                                "includedCabinBags": {
+                                    "quantity": 1
+                                },
+                                "amenities": [
+                                    {
+                                        "description": "1PC MAX 23KG 158LCM EACH",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "1PC MAX 15LB 7KG 115LCM",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "SEAT ASSIGNMENT",
+                                        "isChargeable": true,
+                                        "amenityType": "PRE_RESERVED_SEAT",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "REFUNDABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "MILEAGE ACCRUAL",
+                                        "isChargeable": false,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "CHANGEABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "segmentId": "10",
+                                "cabin": "ECONOMY",
+                                "fareBasis": "NR21AUKO",
+                                "brandedFare": "ECONLIGHT",
+                                "brandedFareLabel": "ECONOMY LIGHT",
+                                "class": "N",
+                                "includedCheckedBags": {
+                                    "quantity": 1
+                                },
+                                "includedCabinBags": {
+                                    "quantity": 1
+                                },
+                                "amenities": [
+                                    {
+                                        "description": "1PC MAX 23KG 158LCM EACH",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "1PC MAX 15LB 7KG 115LCM",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "SEAT ASSIGNMENT",
+                                        "isChargeable": true,
+                                        "amenityType": "PRE_RESERVED_SEAT",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "REFUNDABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "MILEAGE ACCRUAL",
+                                        "isChargeable": false,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "CHANGEABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "type": "flight-offer",
+                "id": "5",
+                "source": "GDS",
+                "instantTicketingRequired": false,
+                "nonHomogeneous": false,
+                "oneWay": false,
+                "isUpsellOffer": false,
+                "lastTicketingDate": "2025-05-25",
+                "lastTicketingDateTime": "2025-05-25",
+                "numberOfBookableSeats": 9,
+                "itineraries": [
+                    {
+                        "duration": "PT29H25M",
+                        "segments": [
+                            {
+                                "departure": {
+                                    "iataCode": "SYD",
+                                    "terminal": "1",
+                                    "at": "2025-05-25T21:50:00"
+                                },
+                                "arrival": {
+                                    "iataCode": "HKG",
+                                    "terminal": "1",
+                                    "at": "2025-05-26T05:10:00"
+                                },
+                                "carrierCode": "CX",
+                                "number": "138",
+                                "aircraft": {
+                                    "code": "359"
+                                },
+                                "operating": {
+                                    "carrierCode": "CX"
+                                },
+                                "duration": "PT9H20M",
+                                "id": "3",
+                                "numberOfStops": 0,
+                                "blacklistedInEU": false
+                            },
+                            {
+                                "departure": {
+                                    "iataCode": "HKG",
+                                    "terminal": "1",
+                                    "at": "2025-05-26T09:05:00"
+                                },
+                                "arrival": {
+                                    "iataCode": "JFK",
+                                    "terminal": "8",
+                                    "at": "2025-05-26T13:15:00"
+                                },
+                                "carrierCode": "CX",
+                                "number": "830",
+                                "aircraft": {
+                                    "code": "77W"
+                                },
+                                "operating": {
+                                    "carrierCode": "CX"
+                                },
+                                "duration": "PT16H10M",
+                                "id": "4",
+                                "numberOfStops": 0,
+                                "blacklistedInEU": false
+                            }
+                        ]
+                    }
+                ],
+                "price": {
+                    "currency": "USD",
+                    "total": "2668.53",
+                    "base": "1689.00",
+                    "fees": [
+                        {
+                            "amount": "0.00",
+                            "type": "SUPPLIER"
+                        },
+                        {
+                            "amount": "0.00",
+                            "type": "TICKETING"
+                        }
+                    ],
+                    "grandTotal": "2668.53"
+                },
+                "pricingOptions": {
+                    "fareType": [
+                        "PUBLISHED"
+                    ],
+                    "includedCheckedBagsOnly": true
+                },
+                "validatingAirlineCodes": [
+                    "CX"
+                ],
+                "travelerPricings": [
+                    {
+                        "travelerId": "1",
+                        "fareOption": "STANDARD",
+                        "travelerType": "ADULT",
+                        "price": {
+                            "currency": "USD",
+                            "total": "889.51",
+                            "base": "563.00"
+                        },
+                        "fareDetailsBySegment": [
+                            {
+                                "segmentId": "3",
+                                "cabin": "ECONOMY",
+                                "fareBasis": "NR21AUKO",
+                                "brandedFare": "ECONLIGHT",
+                                "brandedFareLabel": "ECONOMY LIGHT",
+                                "class": "N",
+                                "includedCheckedBags": {
+                                    "quantity": 1
+                                },
+                                "includedCabinBags": {
+                                    "quantity": 1
+                                },
+                                "amenities": [
+                                    {
+                                        "description": "1PC MAX 23KG 158LCM EACH",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "1PC MAX 15LB 7KG 115LCM",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "SEAT ASSIGNMENT",
+                                        "isChargeable": true,
+                                        "amenityType": "PRE_RESERVED_SEAT",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "REFUNDABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "MILEAGE ACCRUAL",
+                                        "isChargeable": false,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "CHANGEABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "segmentId": "4",
+                                "cabin": "ECONOMY",
+                                "fareBasis": "NR21AUKO",
+                                "brandedFare": "ECONLIGHT",
+                                "brandedFareLabel": "ECONOMY LIGHT",
+                                "class": "N",
+                                "includedCheckedBags": {
+                                    "quantity": 1
+                                },
+                                "includedCabinBags": {
+                                    "quantity": 1
+                                },
+                                "amenities": [
+                                    {
+                                        "description": "1PC MAX 23KG 158LCM EACH",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "1PC MAX 15LB 7KG 115LCM",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "SEAT ASSIGNMENT",
+                                        "isChargeable": true,
+                                        "amenityType": "PRE_RESERVED_SEAT",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "REFUNDABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "MILEAGE ACCRUAL",
+                                        "isChargeable": false,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "CHANGEABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "travelerId": "2",
+                        "fareOption": "STANDARD",
+                        "travelerType": "ADULT",
+                        "price": {
+                            "currency": "USD",
+                            "total": "889.51",
+                            "base": "563.00"
+                        },
+                        "fareDetailsBySegment": [
+                            {
+                                "segmentId": "3",
+                                "cabin": "ECONOMY",
+                                "fareBasis": "NR21AUKO",
+                                "brandedFare": "ECONLIGHT",
+                                "brandedFareLabel": "ECONOMY LIGHT",
+                                "class": "N",
+                                "includedCheckedBags": {
+                                    "quantity": 1
+                                },
+                                "includedCabinBags": {
+                                    "quantity": 1
+                                },
+                                "amenities": [
+                                    {
+                                        "description": "1PC MAX 23KG 158LCM EACH",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "1PC MAX 15LB 7KG 115LCM",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "SEAT ASSIGNMENT",
+                                        "isChargeable": true,
+                                        "amenityType": "PRE_RESERVED_SEAT",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "REFUNDABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "MILEAGE ACCRUAL",
+                                        "isChargeable": false,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "CHANGEABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "segmentId": "4",
+                                "cabin": "ECONOMY",
+                                "fareBasis": "NR21AUKO",
+                                "brandedFare": "ECONLIGHT",
+                                "brandedFareLabel": "ECONOMY LIGHT",
+                                "class": "N",
+                                "includedCheckedBags": {
+                                    "quantity": 1
+                                },
+                                "includedCabinBags": {
+                                    "quantity": 1
+                                },
+                                "amenities": [
+                                    {
+                                        "description": "1PC MAX 23KG 158LCM EACH",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "1PC MAX 15LB 7KG 115LCM",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "SEAT ASSIGNMENT",
+                                        "isChargeable": true,
+                                        "amenityType": "PRE_RESERVED_SEAT",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "REFUNDABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "MILEAGE ACCRUAL",
+                                        "isChargeable": false,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "CHANGEABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "travelerId": "3",
+                        "fareOption": "STANDARD",
+                        "travelerType": "ADULT",
+                        "price": {
+                            "currency": "USD",
+                            "total": "889.51",
+                            "base": "563.00"
+                        },
+                        "fareDetailsBySegment": [
+                            {
+                                "segmentId": "3",
+                                "cabin": "ECONOMY",
+                                "fareBasis": "NR21AUKO",
+                                "brandedFare": "ECONLIGHT",
+                                "brandedFareLabel": "ECONOMY LIGHT",
+                                "class": "N",
+                                "includedCheckedBags": {
+                                    "quantity": 1
+                                },
+                                "includedCabinBags": {
+                                    "quantity": 1
+                                },
+                                "amenities": [
+                                    {
+                                        "description": "1PC MAX 23KG 158LCM EACH",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "1PC MAX 15LB 7KG 115LCM",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "SEAT ASSIGNMENT",
+                                        "isChargeable": true,
+                                        "amenityType": "PRE_RESERVED_SEAT",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "REFUNDABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "MILEAGE ACCRUAL",
+                                        "isChargeable": false,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "CHANGEABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "segmentId": "4",
+                                "cabin": "ECONOMY",
+                                "fareBasis": "NR21AUKO",
+                                "brandedFare": "ECONLIGHT",
+                                "brandedFareLabel": "ECONOMY LIGHT",
+                                "class": "N",
+                                "includedCheckedBags": {
+                                    "quantity": 1
+                                },
+                                "includedCabinBags": {
+                                    "quantity": 1
+                                },
+                                "amenities": [
+                                    {
+                                        "description": "1PC MAX 23KG 158LCM EACH",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "1PC MAX 15LB 7KG 115LCM",
+                                        "isChargeable": false,
+                                        "amenityType": "BAGGAGE",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "SEAT ASSIGNMENT",
+                                        "isChargeable": true,
+                                        "amenityType": "PRE_RESERVED_SEAT",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "REFUNDABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "MILEAGE ACCRUAL",
+                                        "isChargeable": false,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    },
+                                    {
+                                        "description": "CHANGEABLE TICKET",
+                                        "isChargeable": true,
+                                        "amenityType": "BRANDED_FARES",
+                                        "amenityProvider": {
+                                            "name": "BrandedFare"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "dictionaries": {
+            "locations": {
+                "ICN": {
+                    "cityCode": "SEL",
+                    "countryCode": "KR"
+                },
+                "HKG": {
+                    "cityCode": "HKG",
+                    "countryCode": "HK"
+                },
+                "JFK": {
+                    "cityCode": "NYC",
+                    "countryCode": "US"
+                },
+                "SYD": {
+                    "cityCode": "SYD",
+                    "countryCode": "AU"
+                }
+            },
+            "aircraft": {
+                "359": "AIRBUS A350-900",
+                "77W": "BOEING 777-300ER"
+            },
+            "currencies": {
+                "USD": "US DOLLAR"
+            },
+            "carriers": {
+                "CX": "CATHAY PACIFIC",
+                "OZ": "ASIANA AIRLINES"
+            }
+        }
+    },
+    "success": true,
+    "message": "Flight offers fetched successfully"
+}
 
     return res.status(200).json({
-      data: response.data,
+      // data: response.data,
+      ...data,
       success: true,
       message: "Flight offers fetched successfully",
     });
@@ -136,5 +2441,47 @@ export const getToken = async (req, res, next) => {
     next(error);
   }
 };
+export const bookFlight = async (req, res, next) => {
+  try {
+    const {
+      from,
+      to,
+      price,
+      date,
+      time,
+      duration,
+      stops,
+      airline,
+      travelClass,
+      checkedBags,
+      cabinBags
+    } = req.body;
 
+    // Convert date and time to Date objects (UTC)
+    const flightDate = new Date(date);
+    const flightTime = new Date(time);
 
+    // Create the booking
+    const savedBooking = await bookingModel.create({
+      from,
+      to,
+      price,
+      date: flightDate,
+      time: flightTime,
+      duration,
+      stops,
+      airline,
+      travelClass,
+      checkedBags,
+      cabinBags
+    });
+
+    res.status(201).json({
+      data: savedBooking,
+      success: true,
+      message: "Flight booked successfully"
+    });
+  } catch (error) {
+    next(error);
+  }
+};

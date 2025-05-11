@@ -5,29 +5,57 @@ const bookingSchema = Schema(
     {
         from: {
             type: String,
+            required: true
         },
         to: {
             type: String,
+            required: true
+
+        },
+        price: {
+            type: Number,
+            required: true
         },
         date: {
-            type: Date
-        },
-       time:{
-        type:Date,
-       },
-         duration: {
-            type: String,
-        },
-          stops: {
-            type: Number,
-        },
-          airline: {
-            type: String,
-        },
-          class: {
-            type: String,
-        },
+            type: Date,
+            required: true
 
+        },
+        time: {
+            type: Date,
+            required: true
+
+        },
+        duration: {
+            type: String,
+            required: true
+
+        },
+        stops: {
+            type: Number,
+            required: true
+
+        },
+        airline: {
+            type: String,
+            required: true
+
+        },
+        travelClass: {
+            type: String,
+            required: true
+
+        },
+        checkedBags: {
+            type: Number,
+            required: true
+
+        },
+        cabinBags: {
+            type: Number,
+            required: true
+
+        },
     },
     {
         timestamps: true, // This will add createdAt and updatedAt field
@@ -35,5 +63,5 @@ const bookingSchema = Schema(
 );
 
 // Create User model
-const usersModel = mongoose.model("users", usersSchema);
-export default usersModel
+const bookingModel = mongoose.model("booking", bookingSchema);
+export default bookingModel
