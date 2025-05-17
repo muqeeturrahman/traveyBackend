@@ -55,6 +55,204 @@ const getAccessToken = async () => {
   }
 };
 
+export const flightOffers = async (req, res, next) => {
+  try {
+    // ✅ Get valid token (will refresh if needed)
+    const token = await getAccessToken();
+    // console.log("✅ Token used:", token);
+
+    const { originLocationCode, destinationLocationCode, departureDate, adults, max,returnDate,children,infants,travelClass } = req.body;
+    // console.log(originLocationCode, ">>>>>>");
+
+ const response = await axios.get(
+  "https://test.api.amadeus.com/v2/shopping/flight-offers",
+  {
+    params: {
+      originLocationCode,
+      destinationLocationCode,
+      departureDate,
+      adults: adults || 1,
+      currencyCode: "USD",
+      max,
+      ...(returnDate && { returnDate }),
+      ...(children && { children }),
+      ...(infants && { infants }),
+      ...(travelClass && { travelClass }),
+    },
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  }
+);
+
+
+    return res.status(200).json({
+      data: response.data,
+    //   ...data,
+      success: true,
+      message: "Flight offers fetched successfully",
+    });
+  } catch (error) {
+    console.error("❌ Error in flightOffers:", error.message);
+
+    if (error.response) {
+      return res.status(error.response.status).json({
+        success: false,
+        error: error.response.data,
+        message: error.response.statusText,
+      });
+    } else {
+      return res.status(500).json({
+        success: false,
+        error: error.message,
+        message: "Server error while fetching flight offers",
+      });
+    }
+  }
+};
+
+export const getToken = async (req, res, next) => {
+  try {
+    const tokenData = await tokenModel.findOne({}).sort({ createdAt: -1 });
+
+    if (!tokenData) {
+      return res.status(404).json({
+        success: false,
+        message: "No token found",
+      });
+    }
+
+    const nowInSeconds = Math.floor(Date.now() / 1000); // Convert to seconds
+    const createdAtInSeconds = Math.floor(new Date(tokenData.createdAt).getTime() / 1000);
+    const expiryTime = createdAtInSeconds + tokenData.expiresAt;
+
+    if (tokenData.access_token && expiryTime > nowInSeconds) {
+      return res.status(200).json({
+        data: tokenData,
+        success: true,
+        message: "token",
+      });
+    } else {
+      return res.status(401).json({
+        success: false,
+        message: "Token expired",
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const bookFlight = async (req, res, next) => {
+  try {
+    const {
+      from,
+      to,
+      price,
+      date,
+      time,
+      duration,
+      stops,
+      travelClass,
+      checkedBags,
+      cabinBags,
+      paymentStatus,
+      paymentId,
+      adults,
+      infants,
+      children,
+      departureDate,
+      returnDate,
+      departureAirline,
+      returnAirline,
+      fullName,
+      email,
+      phoneNumber
+    } = req.body;
+
+    const flightDate = new Date(date);
+    const flightTime = new Date(time);
+    const orderId = `ORDER-${Date.now()}`;
+
+    // Build base booking data
+    const bookingData = {
+      from,
+      to,
+      price,
+      date: flightDate,
+      time: flightTime,
+      duration,
+      stops,
+      travelClass,
+      checkedBags,
+      cabinBags,
+      paymentStatus: paymentStatus || "pending",
+      departureDate,
+      departureAirline,
+      fullName,
+      email,
+      phoneNumber
+    };
+
+    // Conditionally add optional fields
+    if (paymentId) bookingData.paymentId = paymentId;
+    if (adults !== undefined) bookingData.adults = adults;
+    if (infants !== undefined) bookingData.infants = infants;
+    if (children !== undefined) bookingData.children = children;
+    if (returnDate) bookingData.returnDate = returnDate;
+    if (returnAirline) bookingData.returnAirline = returnAirline;
+
+    // Create initial booking
+    const booking = await bookingModel.create(bookingData);
+
+    // Call NOWPayments to create invoice
+    const nowRes = await axios.post(
+      "https://api.nowpayments.io/v1/invoice",
+      {
+        price_amount: price,
+        price_currency: "usd",
+        pay_currency: "btc",
+        order_id: orderId,
+        ipn_callback_url: "https://yourdomain.com/api/ipn",
+        success_url: "https://yourdomain.com/payment-success",
+        cancel_url: "https://yourdomain.com/payment-cancel"
+      },
+      {
+        headers: {
+          "x-api-key": process.env.NOWPAYMENTS_API_KEY,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    console.log("NOWPayments response:", nowRes.data);
+
+    // Update booking with payment details
+    booking.paymentId = nowRes.data.payment_id;
+    booking.paymentStatus = nowRes.data.payment_status || "waiting";
+    booking.orderId = orderId;
+    await booking.save();
+
+    // Send response
+    res.status(201).json({
+      success: true,
+      message: "Flight booked, awaiting payment",
+      data: {
+        booking,
+        payment_url: nowRes.data.invoice_url
+      }
+    });
+
+  } catch (error) {
+    console.error("Booking or payment error:", error.response?.data || error.message);
+    res.status(500).json({
+      success: false,
+      message: "Booking failed",
+      error: error.response?.data || error.message
+    });
+  }
+};
 // export const flightOffers = async (req, res, next) => {
 //   try {
 //     // ✅ Get valid token (will refresh if needed)
@@ -2409,135 +2607,3 @@ const getAccessToken = async () => {
 //     }
 //   }
 // };
-export const flightOffers = async (req, res, next) => {
-  try {
-    // ✅ Get valid token (will refresh if needed)
-    const token = await getAccessToken();
-    // console.log("✅ Token used:", token);
-
-    const { originLocationCode, destinationLocationCode, departureDate, adults, max,returnDate,children,infants,travelClass } = req.body;
-    // console.log(originLocationCode, ">>>>>>");
-
- const response = await axios.get(
-  "https://test.api.amadeus.com/v2/shopping/flight-offers",
-  {
-    params: {
-      originLocationCode,
-      destinationLocationCode,
-      departureDate,
-      adults: adults || 1,
-      currencyCode: "USD",
-      max,
-      ...(returnDate && { returnDate }),
-      ...(children && { children }),
-      ...(infants && { infants }),
-      ...(travelClass && { travelClass }),
-    },
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-  }
-);
-
-
-    return res.status(200).json({
-      data: response.data,
-    //   ...data,
-      success: true,
-      message: "Flight offers fetched successfully",
-    });
-  } catch (error) {
-    console.error("❌ Error in flightOffers:", error.message);
-
-    if (error.response) {
-      return res.status(error.response.status).json({
-        success: false,
-        error: error.response.data,
-        message: error.response.statusText,
-      });
-    } else {
-      return res.status(500).json({
-        success: false,
-        error: error.message,
-        message: "Server error while fetching flight offers",
-      });
-    }
-  }
-};
-
-export const getToken = async (req, res, next) => {
-  try {
-    const tokenData = await tokenModel.findOne({}).sort({ createdAt: -1 });
-
-    if (!tokenData) {
-      return res.status(404).json({
-        success: false,
-        message: "No token found",
-      });
-    }
-
-    const nowInSeconds = Math.floor(Date.now() / 1000); // Convert to seconds
-    const createdAtInSeconds = Math.floor(new Date(tokenData.createdAt).getTime() / 1000);
-    const expiryTime = createdAtInSeconds + tokenData.expiresAt;
-
-    if (tokenData.access_token && expiryTime > nowInSeconds) {
-      return res.status(200).json({
-        data: tokenData,
-        success: true,
-        message: "token",
-      });
-    } else {
-      return res.status(401).json({
-        success: false,
-        message: "Token expired",
-      });
-    }
-  } catch (error) {
-    next(error);
-  }
-};
-export const bookFlight = async (req, res, next) => {
-  try {
-    const {
-      from,
-      to,
-      price,
-      date,
-      time,
-      duration,
-      stops,
-      airline,
-      travelClass,
-      checkedBags,
-      cabinBags
-    } = req.body;
-
-    // Convert date and time to Date objects (UTC)
-    const flightDate = new Date(date);
-    const flightTime = new Date(time);
-
-    // Create the booking
-    const savedBooking = await bookingModel.create({
-      from,
-      to,
-      price,
-      date: flightDate,
-      time: flightTime,
-      duration,
-      stops,
-      airline,
-      travelClass,
-      checkedBags,
-      cabinBags
-    });
-
-    res.status(201).json({
-      data: savedBooking,
-      success: true,
-      message: "Flight booked successfully"
-    });
-  } catch (error) {
-    next(error);
-  }
-};
