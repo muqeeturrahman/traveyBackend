@@ -31,10 +31,6 @@
                 type: Number,
                 required: true
             },
-            travelClass: {
-                type: String,
-                required: true
-            },
             checkedBags: {
                 type: Number,
                 required: true

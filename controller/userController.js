@@ -2764,3 +2764,25 @@ export const getDiscount = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getBookingById = async (req, res, next) => {
+  try {
+const id = req.params.id;
+    const bookings = await bookingModel.findById(id)
+
+    if (!bookings) {
+      return res.status(404).json({
+        success: false,
+        message: 'booking not found',
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Booking fetched successfully',
+      data: bookings,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
