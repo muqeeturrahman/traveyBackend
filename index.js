@@ -58,11 +58,14 @@ app.use(logEndpoint);
 app.use("/api/user", userRouter);
 
 
-server.listen(port, () => {
-  console.log("Listening on port " + port);
-});
-
 mongoose
   .connect(process.env.LOCALDB)
-  .then(() => console.log("connected to mongodb"))
-  .catch(() => console.log("could not connect to mongodb"));
+  .then(() => {
+    console.log("connected to mongodb");
+    server.listen(port, () => {
+      console.log("Listening on port " + port);
+    });
+  })
+  .catch((err) => {
+    console.error("could not connect to mongodb", err.message);
+  });

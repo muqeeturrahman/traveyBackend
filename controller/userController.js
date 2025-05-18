@@ -4,8 +4,9 @@ import dotenv from "dotenv"
 import tokenModel from "../models/token.js"
 import bookingModel from "../models/bookingModel.js"
 import usersModel from "../models/users.js"
-import { hash,compare } from "bcrypt"
+import { hash, compare } from "bcrypt"
 import { generateToken } from "../utilities/helpers.js"
+import DiscountModel from "../models/discountModel.js"
 dotenv.config()
 
 const getAccessToken = async () => {
@@ -2611,74 +2612,74 @@ export const bookFlight = async (req, res, next) => {
 //   }
 // };
 
-  export const register = async (req, res, next) => {
-    try {
-      const { email, password, role } = req.body;
+export const register = async (req, res, next) => {
+  try {
+    const { email, password, role } = req.body;
 
-      const userExists = await usersModel.findOne({ email, isDeleted: false });
-      if (userExists) {
-        return res.status(400).json({
-          success: false,
-          message: "User already exists",
-        });
-      }
-
-      const hashedPassword = await hash(password, 10);
-
-      const user = await usersModel.create({
-        email,
-        role,
-        password: hashedPassword,
+    const userExists = await usersModel.findOne({ email, isDeleted: false });
+    if (userExists) {
+      return res.status(400).json({
+        success: false,
+        message: "User already exists",
       });
-
-      return res.status(201).json({
-        success: true,
-        message: "User registered successfully",
-        data: user
-      });
-    } catch (error) {
-      next(error);
     }
-  };
 
-  export const login = async (req, res, next) => {
-    try {
-      const { email, password } = req.body;
+    const hashedPassword = await hash(password, 10);
 
-      // Check if user exists
-      const user = await usersModel.findOne({ email, isDeleted: false });
-      if (!user) {
-        return res.status(401).json({
-          success: false,
-          message: 'Invalid email or password',
-        });
-      }
+    const user = await usersModel.create({
+      email,
+      role,
+      password: hashedPassword,
+    });
 
-      // Compare password
-      const isMatch = await compare(password, user.password);
-      
-      if (!isMatch) {
-        return res.status(401).json({
-          success: false,
-          message: 'Invalid email or password',
-        });
-      }
+    return res.status(201).json({
+      success: true,
+      message: "User registered successfully",
+      data: user
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
-      // Generate JWT Token
-      const token =generateToken(user)
+export const login = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
 
-      return res.status(200).json({
-        success: true,
-        message: 'Login successful',
-        data: {user,token},
+    // Check if user exists
+    const user = await usersModel.findOne({ email, isDeleted: false });
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password',
       });
-    } catch (error) {
-      next(error);
     }
-  };
+
+    // Compare password
+    const isMatch = await compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password',
+      });
+    }
+
+    // Generate JWT Token
+    const token = generateToken(user)
+
+    return res.status(200).json({
+      success: true,
+      message: 'Login successful',
+      data: { user, token },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 export const getBookings = async (req, res, next) => {
   try {
-    const bookings = await bookingModel.find({ }).sort({createdAt:-1});
+    const bookings = await bookingModel.find({}).sort({ createdAt: -1 });
 
     if (bookings.length === 0) {
       return res.status(404).json({
@@ -2691,6 +2692,73 @@ export const getBookings = async (req, res, next) => {
       success: true,
       message: 'Bookings fetched successfully',
       data: bookings,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+
+export const discountPercentage = async (req, res, next) => {
+  try {
+    const updateFields = {};
+
+    // Only add fields that are present in the request body
+    if (req.body.flightDiscount !== undefined) {
+      updateFields.flightDiscount = req.body.flightDiscount;
+    }
+    if (req.body.hotelDiscount !== undefined) {
+      updateFields.hotelDiscount = req.body.hotelDiscount;
+    }
+    if (req.body.carDiscount !== undefined) {
+      updateFields.carDiscount = req.body.carDiscount;
+    }
+
+    // If nothing to update, return early
+    if (Object.keys(updateFields).length === 0) {
+      return res.status(400).json({ message: "No valid discount fields provided." });
+    }
+
+    // Find the existing discount document or create one if it doesn't exist
+    let discount = await DiscountModel.findOne();
+
+    if (!discount) {
+      // Create new document with only the provided fields
+      discount = await DiscountModel.create(updateFields);
+    } else {
+      // Update existing document with only the provided fields
+      discount = await DiscountModel.findByIdAndUpdate(
+        discount._id,
+        { $set: updateFields },
+        { new: true }
+      );
+    }
+
+    res.status(200).json({
+      message: "Discount updated successfully",
+      data: discount,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getDiscount = async (req, res, next) => {
+  try {
+    const discount = await DiscountModel.findOne({}).sort({ createdAt: -1 });
+
+    if (!discount) {
+      return res.status(404).json({
+        success: false,
+        message: 'No discounts percentage found',
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'discount percentages fetched successfully',
+      data: discount,
     });
   } catch (error) {
     next(error);
