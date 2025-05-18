@@ -2,7 +2,7 @@ import dotenv from "dotenv"
 dotenv.config()
 import jwt from "jsonwebtoken"
 // secret jwt token
-const jwtSecret = process.env.JWTSECRETUSERAPP;
+const jwtSecret = process.env.JWT_SECRET;
 
 // fetch user function
 const usersMiddleware = async (req, res, next) => {

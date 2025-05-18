@@ -3,6 +3,9 @@ import axios from "axios"
 import dotenv from "dotenv"
 import tokenModel from "../models/token.js"
 import bookingModel from "../models/bookingModel.js"
+import usersModel from "../models/users.js"
+import { hash,compare } from "bcrypt"
+import { generateToken } from "../utilities/helpers.js"
 dotenv.config()
 
 const getAccessToken = async () => {
@@ -61,35 +64,35 @@ export const flightOffers = async (req, res, next) => {
     const token = await getAccessToken();
     // console.log("✅ Token used:", token);
 
-    const { originLocationCode, destinationLocationCode, departureDate, adults, max,returnDate,children,infants,travelClass } = req.body;
+    const { originLocationCode, destinationLocationCode, departureDate, adults, max, returnDate, children, infants, travelClass } = req.body;
     // console.log(originLocationCode, ">>>>>>");
 
- const response = await axios.get(
-  "https://test.api.amadeus.com/v2/shopping/flight-offers",
-  {
-    params: {
-      originLocationCode,
-      destinationLocationCode,
-      departureDate,
-      adults: adults || 1,
-      currencyCode: "USD",
-      max,
-      ...(returnDate && { returnDate }),
-      ...(children && { children }),
-      ...(infants && { infants }),
-      ...(travelClass && { travelClass }),
-    },
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-  }
-);
+    const response = await axios.get(
+      "https://test.api.amadeus.com/v2/shopping/flight-offers",
+      {
+        params: {
+          originLocationCode,
+          destinationLocationCode,
+          departureDate,
+          adults: adults || 1,
+          currencyCode: "USD",
+          max,
+          ...(returnDate && { returnDate }),
+          ...(children && { children }),
+          ...(infants && { infants }),
+          ...(travelClass && { travelClass }),
+        },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
 
     return res.status(200).json({
       data: response.data,
-    //   ...data,
+      //   ...data,
       success: true,
       message: "Flight offers fetched successfully",
     });
@@ -2607,3 +2610,89 @@ export const bookFlight = async (req, res, next) => {
 //     }
 //   }
 // };
+
+  export const register = async (req, res, next) => {
+    try {
+      const { email, password, role } = req.body;
+
+      const userExists = await usersModel.findOne({ email, isDeleted: false });
+      if (userExists) {
+        return res.status(400).json({
+          success: false,
+          message: "User already exists",
+        });
+      }
+
+      const hashedPassword = await hash(password, 10);
+
+      const user = await usersModel.create({
+        email,
+        role,
+        password: hashedPassword,
+      });
+
+      return res.status(201).json({
+        success: true,
+        message: "User registered successfully",
+        data: user
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  export const login = async (req, res, next) => {
+    try {
+      const { email, password } = req.body;
+
+      // Check if user exists
+      const user = await usersModel.findOne({ email, isDeleted: false });
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          message: 'Invalid email or password',
+        });
+      }
+
+      // Compare password
+      const isMatch = await compare(password, user.password);
+      
+      if (!isMatch) {
+        return res.status(401).json({
+          success: false,
+          message: 'Invalid email or password',
+        });
+      }
+
+      // Generate JWT Token
+      const token =generateToken(user)
+
+      return res.status(200).json({
+        success: true,
+        message: 'Login successful',
+        data: {user,token},
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+export const getBookings = async (req, res, next) => {
+  try {
+    const bookings = await bookingModel.find({ }).sort({createdAt:-1});
+
+    if (bookings.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No bookings found',
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Bookings fetched successfully',
+      data: bookings,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

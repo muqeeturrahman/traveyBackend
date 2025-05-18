@@ -6,16 +6,13 @@ const usersSchema = Schema(
     fullName: {
       type: String,
     },
-    // LastName: {
-    //   type: String,
-    // },
-    username: {
+  email: {
       type: String,
-      unique: true,
     },
+  
     phoneNumber: {
       type: String,
-      required: true,
+     
       
     },
     password: {
@@ -29,11 +26,7 @@ const usersSchema = Schema(
     avatar: {
       type: String,
     },
-    roleId: {
-      type: mongoose.Types.ObjectId,
-      required: true,
-      ref: "roles",
-    },
+
     // countryCode: {
     //   type: String,
     //   required: true,
@@ -42,15 +35,13 @@ const usersSchema = Schema(
       type: Boolean,
       default: 0,
     },
-    fcmToken: {
+    role: {
       type: String,
     },
     isBlocked: {
       type: Boolean,
     },
-    isBlockedByAdmin: {
-      type: Boolean,
-    },
+ 
     isNotification: {
       type: Boolean,
       default: 1,

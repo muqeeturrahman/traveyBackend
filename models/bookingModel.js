@@ -99,9 +99,7 @@
                 type: Number,
                 required: true
             },
-        },
-
-        
+        },        
         {
             timestamps: true
         }
