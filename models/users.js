@@ -9,9 +9,13 @@ const usersSchema = Schema(
   email: {
       type: String,
     },
-  
+    countryCode: {
+      type: Number,
+     
+      
+    },
     phoneNumber: {
-      type: String,
+      type: Number,
      
       
     },
