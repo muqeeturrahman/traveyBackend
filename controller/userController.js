@@ -62,6 +62,113 @@ const getAccessToken = async () => {
 };
 const flightCache = new NodeCache({ stdTTL: 300, checkperiod: 120 });
 
+// export const flightOffers = async (req, res, next) => {
+//   try {
+
+//     const {
+//       originLocationCode,
+//       destinationLocationCode,
+//       departureDate,
+//       adults,
+//       max = 100,
+//       returnDate,
+//       children,
+//       infants,
+//       travelClass,
+    
+//     } = req.body;
+//     console.log(req.body,"req.body>>>>>>>>>>>>>");
+    
+//     const page=req.body.page || 1
+//     const limit=req.body.limit || 10
+//     // Create a stable, clean cache key
+//     const keyPayload = {
+//       originLocationCode,
+//       destinationLocationCode,
+//       departureDate,
+//       adults: adults || 1,
+//       ...(returnDate && { returnDate }),
+//       ...(children && { children }),
+//       ...(infants && { infants }),
+//       ...(travelClass && { travelClass }),
+//       max,
+//     };
+//     const cacheKey = JSON.stringify(keyPayload);
+
+//     let allOffers = flightCache.get(cacheKey);
+
+//     if (!allOffers) {
+//       console.log("⛔ Cache MISS: calling Amadeus API");
+
+//       const token = await getAccessToken();
+
+//       const response = await axios.get(
+//         "https://test.api.amadeus.com/v2/shopping/flight-offers",
+//         {
+//           params: {
+//             originLocationCode,
+//             destinationLocationCode,
+//             departureDate,
+//             adults: adults || 1,
+//             currencyCode: "USD",
+//             max,
+//             ...(returnDate && { returnDate }),
+//             ...(children && { children }),
+//             ...(infants && { infants }),
+//             ...(travelClass && { travelClass }),
+//           },
+//           headers: {
+//             Authorization: `Bearer ${token}`,
+//             "Content-Type": "application/json",
+//           },
+//         }
+//       );
+
+//       allOffers = response.data.data || [];
+//       flightCache.set(cacheKey, allOffers); // Cache the result
+//       console.log("✅ Response cached.");
+//     } else {
+//       console.log("✅ Cache HIT: served from cache");
+//     }
+
+//     // Pagination logic
+//     const total = allOffers.length;
+//     const pageInt = parseInt(page);
+//     const limitInt = parseInt(limit);
+//     const startIndex = (pageInt - 1) * limitInt;
+//     const endIndex = startIndex + limitInt;
+//     const paginatedData = allOffers.slice(startIndex, endIndex);
+
+//     return res.status(200).json({
+//       success: true,
+//       message: "Flight offers fetched successfully",
+//       data: { data: paginatedData },
+//       meta: {
+//         total,
+//         page: pageInt,
+//         limit: limitInt,
+//         totalPages: Math.ceil(total / limitInt),
+//         fromCache: !!allOffers,
+//       },
+//     });
+//   } catch (error) {
+//     console.error("❌ Error in flightOffers:", error.message);
+
+//     if (error.response) {
+//       return res.status(error.response.status).json({
+//         success: false,
+//         error: error.response.data,
+//         message: error.response.statusText,
+//       });
+//     } else {
+//       return res.status(500).json({
+//         success: false,
+//         error: error.message,
+//         message: "Server error while fetching flight offers",
+//       });
+//     }
+//   }
+// };
 export const flightOffers = async (req, res, next) => {
   try {
     const {
@@ -139,7 +246,7 @@ export const flightOffers = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       message: "Flight offers fetched successfully",
-      data: { data: paginatedData },
+      data: {data:paginatedData},
       meta: {
         total,
         page: pageInt,
@@ -166,7 +273,6 @@ export const flightOffers = async (req, res, next) => {
     }
   }
 };
-
 export const getToken = async (req, res, next) => {
   try {
     const tokenData = await tokenModel.findOne({}).sort({ createdAt: -1 });
