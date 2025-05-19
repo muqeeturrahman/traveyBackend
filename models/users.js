@@ -11,8 +11,6 @@ const usersSchema = Schema(
     },
     countryCode: {
       type: Number,
-     
-      
     },
     phoneNumber: {
       type: Number,

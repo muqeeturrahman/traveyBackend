@@ -223,7 +223,8 @@ export const bookFlight = async (req, res, next) => {
       returnAirline,
       fullName,
       email,
-      phoneNumber
+      phoneNumber,
+      countryCode
     } = req.body;
 
     const flightDate = new Date(date);
@@ -247,7 +248,8 @@ export const bookFlight = async (req, res, next) => {
       departureAirline,
       fullName,
       email,
-      phoneNumber
+      phoneNumber,
+      countryCode
     };
 
     // Conditionally add optional fields
