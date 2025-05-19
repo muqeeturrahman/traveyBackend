@@ -139,7 +139,7 @@ export const flightOffers = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       message: "Flight offers fetched successfully",
-      data: paginatedData,
+      data: {data:paginatedData},
       meta: {
         total,
         page: pageInt,
