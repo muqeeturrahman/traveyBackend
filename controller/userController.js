@@ -139,7 +139,7 @@ export const flightOffers = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       message: "Flight offers fetched successfully",
-      data: {data:paginatedData},
+      data: { data: paginatedData },
       meta: {
         total,
         page: pageInt,
@@ -2733,8 +2733,8 @@ export const login = async (req, res, next) => {
 export const getBookings = async (req, res, next) => {
   try {
     // const { currentPage , itemsPerPage  } = req.query;
-    const page=req.query.page || 1
-    const limit=req.query.limit || 10
+    const page = req.query.page || 1
+    const limit = req.query.limit || 10
     const bookings = await bookingModel.find({}).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit);
 
     if (bookings.length === 0) {
@@ -2823,7 +2823,7 @@ export const getDiscount = async (req, res, next) => {
 
 export const getBookingById = async (req, res, next) => {
   try {
-const id = req.params.id;
+    const id = req.params.id;
     const bookings = await bookingModel.findById(id)
 
     if (!bookings) {
@@ -2837,6 +2837,52 @@ const id = req.params.id;
       success: true,
       message: 'Booking fetched successfully',
       data: bookings,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+export const deleteBookingById = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const bookings = await bookingModel.findById(id)
+
+    if (!bookings) {
+      return res.status(404).json({
+        success: false,
+        message: 'booking not found',
+      });
+    }
+    const deleteBooking = await bookingModel.findByIdAndDelete(id)
+    return res.status(200).json({
+      success: true,
+      message: 'Booking deleted successfully',
+      data: deleteBooking,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+export const logout = async (req, res, next) => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized - no user ID found in token',
+      });
+    }
+
+    // Update user's lastLogout and optionally clear token
+    await usersModel.findByIdAndUpdate(userId, {
+      lastLogout: new Date(),
+      authToken: null, // Optional: store and clear JWT
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Logout successful',
     });
   } catch (error) {
     next(error);
