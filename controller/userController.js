@@ -8,6 +8,7 @@ import { hash, compare } from "bcrypt"
 import { generateToken } from "../utilities/helpers.js"
 import DiscountModel from "../models/discountModel.js"
 import NodeCache from "node-cache";
+import { v4 as uuidv4 } from 'uuid';
 
 dotenv.config()
 
@@ -64,6 +65,10 @@ const flightCache = new NodeCache({ stdTTL: 300, checkperiod: 120 });
 
 export const flightOffers = async (req, res, next) => {
   try {
+    const discount = await DiscountModel.findOne({}).sort({ createdAt: -1 })
+
+
+
     const {
       originLocationCode,
       destinationLocationCode,
@@ -74,10 +79,10 @@ export const flightOffers = async (req, res, next) => {
       children,
       infants,
       travelClass,
-      page = 1,
-      limit = 10,
-    } = req.body;
 
+    } = req.body;
+    const page = req.body.page || 1
+    const limit = req.body.limit | 10
     // Create a stable, clean cache key
     const keyPayload = {
       originLocationCode,
@@ -139,7 +144,7 @@ export const flightOffers = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       message: "Flight offers fetched successfully",
-      data: { data: paginatedData },
+      data: { data: paginatedData, flightDiscount: discount.flightDiscount },
       meta: {
         total,
         page: pageInt,
@@ -229,7 +234,8 @@ export const bookFlight = async (req, res, next) => {
 
     const flightDate = new Date(date);
     const flightTime = new Date(time);
-    const orderId = `ORDER-${Date.now()}`;
+    const orderId = `ORDER-${uuidv4()}`;
+
 
     // Build base booking data
     const bookingData = {
@@ -310,6 +316,28 @@ export const bookFlight = async (req, res, next) => {
     });
   }
 };
+export const confirmPayment = async (req, res, next) => {
+  try {
+    const {orderId}=req.body;
+    const booking = await bookingModel.findOne({orderId:orderId})
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: 'booking not found',
+      });
+    }
+const payment=await bookingModel.findByIdAndUpdate(booking._id,{paymentStatus:"confirmed"},{new:true})
+    return res.status(200).json({
+      success: true,
+      message: 'payment confirmed successfully',
+      data: payment,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // export const flightOffers = async (req, res, next) => {
 //   try {
 //     // ✅ Get valid token (will refresh if needed)
