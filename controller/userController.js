@@ -277,7 +277,7 @@ export const bookFlight = async (req, res, next) => {
         price_currency: "aud",
         pay_currency: "btc",
         order_id: orderId,
-        ipn_callback_url: "https://yourdomain.com/api/ipn",
+        ipn_callback_url: "https://travey-backend.vercel.app/api/user/confirmPayment",
         success_url: "https://yourdomain.com/payment-success",
         cancel_url: "https://yourdomain.com/payment-cancel"
       },
@@ -318,25 +318,39 @@ export const bookFlight = async (req, res, next) => {
 };
 export const confirmPayment = async (req, res, next) => {
   try {
-    const {orderId}=req.body;
-    const booking = await bookingModel.findOne({orderId:orderId})
+    const { order_id, payment_status } = req.body;
+console.log(req.body,"body>>>>>>>>.");
+
+    if (!order_id || payment_status !== 'finished') {
+      return res.status(400).json({ success: false, message: 'Invalid or incomplete payment data' });
+    }
+
+    const booking = await bookingModel.findOne({ orderId: order_id });
 
     if (!booking) {
       return res.status(404).json({
         success: false,
-        message: 'booking not found',
+        message: 'Booking not found',
       });
     }
-const payment=await bookingModel.findByIdAndUpdate(booking._id,{paymentStatus:"confirmed"},{new:true})
+
+    booking.paymentStatus = 'confirmed';
+    await booking.save();
+
     return res.status(200).json({
       success: true,
-      message: 'payment confirmed successfully',
-      data: payment,
+      message: 'Payment confirmed successfully',
     });
   } catch (error) {
-    next(error);
+    console.error('IPN error:', error.message);
+    res.status(500).json({
+      success: false,
+      message: 'Payment confirmation failed',
+      error: error.message
+    });
   }
 };
+
 
 // export const flightOffers = async (req, res, next) => {
 //   try {
