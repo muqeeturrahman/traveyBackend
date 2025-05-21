@@ -3041,3 +3041,33 @@ export const logout = async (req, res, next) => {
     next(error);
   }
 };
+export const city = async (req, res, next) => {
+  try {
+    const { keyword } = req.query;
+    const token = await getAccessToken();
+    console.log(token, "token>>>>");
+
+    const response = await axios.get(
+      "https://test.api.amadeus.com/v1/reference-data/locations",
+      {
+        params: {
+          keyword,
+          subType: "CITY,AIRPORT",
+        },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: 'city suggestions',
+      data: response.data, // ✅ only send the actual data
+    });
+
+  } catch (error) {
+    next(error);
+  }
+};
