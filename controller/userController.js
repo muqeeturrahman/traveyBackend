@@ -10,7 +10,7 @@ import DiscountModel from "../models/discountModel.js"
 import NodeCache from "node-cache";
 import { v4 as uuidv4 } from 'uuid';
 import { log } from "node:console"
-
+import { sendEmail } from "../utilities/helpers.js"
 dotenv.config()
 
 const getAccessToken = async () => {
@@ -2820,30 +2820,57 @@ console.log(req.body,"body>>>>>>>>.");
 
 export const register = async (req, res, next) => {
   try {
-    const { email, password, role } = req.body;
+    const { email, password, confirmPassword, role } = req.body;
+
+    if (!email || !password || !confirmPassword || !role) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required.",
+      });
+    }
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Passwords do not match.",
+      });
+    }
 
     const userExists = await usersModel.findOne({ email, isDeleted: false });
     if (userExists) {
       return res.status(400).json({
         success: false,
-        message: "User already exists",
+        message: "User already exists.",
       });
     }
 
     const hashedPassword = await hash(password, 10);
 
+    // Generate 6-digit OTP
+    const otpCode = Math.floor(100000 + Math.random() * 900000);
+    const otpGenerateTimeDate = new Date();
+
+    // Send OTP email
+    await sendEmail(email, "OTP Code", `Your OTP code is ${otpCode}`);
+
+    // Create user with OTP
     const user = await usersModel.create({
       email,
       role,
       password: hashedPassword,
+      otpCode,
+      otpGenerateTimeDate,
+      isOtpExpire: false,
+      isOtpVerified: false,
     });
 
     return res.status(201).json({
       success: true,
-      message: "User registered successfully",
+      message: "User registered successfully. OTP sent to email.",
       data: user
     });
   } catch (error) {
+    console.error("Registration error:", error);
     next(error);
   }
 };

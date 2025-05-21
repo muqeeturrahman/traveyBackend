@@ -20,7 +20,7 @@ const usersSchema = Schema(
     password: {
       type: String,
       required: true,
-      unique: true,
+
     },
     otpCode: {
       type: Number,
@@ -39,6 +39,7 @@ const usersSchema = Schema(
     },
     role: {
       type: String,
+        enum: ['admin','user'],
     },
     isBlocked: {
       type: Boolean,
