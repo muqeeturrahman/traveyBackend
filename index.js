@@ -55,6 +55,12 @@ const logEndpoint = (req, res, next) => {
 app.use(logEndpoint);
 
 // Routes
+app.get('/',(req,res,next)=>{
+  res.json({
+    success:true,
+    message:"Welcome to Travey Backend"
+  })
+})
 app.use("/api/user", userRouter);
 
 

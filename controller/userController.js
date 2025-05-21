@@ -8,6 +8,8 @@ import { hash, compare } from "bcrypt"
 import { generateToken } from "../utilities/helpers.js"
 import DiscountModel from "../models/discountModel.js"
 import NodeCache from "node-cache";
+import { v4 as uuidv4 } from 'uuid';
+import { log } from "node:console"
 
 dotenv.config()
 
@@ -171,6 +173,10 @@ const flightCache = new NodeCache({ stdTTL: 300, checkperiod: 120 });
 // };
 export const flightOffers = async (req, res, next) => {
   try {
+    const discount = await DiscountModel.findOne({}).sort({ createdAt: -1 })
+
+
+
     const {
       originLocationCode,
       destinationLocationCode,
@@ -181,9 +187,13 @@ export const flightOffers = async (req, res, next) => {
       children,
       infants,
       travelClass,
-      page = 1,
-      limit = 10,
-    } = req.body;
+      currencyCode
+
+    } = req.query;
+    console.log(req.query,">>>>>>.")
+ 
+    const page = req.query.page || 1
+    const limit = req.query.limit | 10
 
     // Create a stable, clean cache key
     const keyPayload = {
@@ -214,7 +224,7 @@ export const flightOffers = async (req, res, next) => {
             destinationLocationCode,
             departureDate,
             adults: adults || 1,
-            currencyCode: "USD",
+            currencyCode: currencyCode,
             max,
             ...(returnDate && { returnDate }),
             ...(children && { children }),
@@ -246,7 +256,7 @@ export const flightOffers = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       message: "Flight offers fetched successfully",
-      data: {data:paginatedData},
+      data: { data: paginatedData, flightDiscount: discount.flightDiscount },
       meta: {
         total,
         page: pageInt,
@@ -335,7 +345,8 @@ export const bookFlight = async (req, res, next) => {
 
     const flightDate = new Date(date);
     const flightTime = new Date(time);
-    const orderId = `ORDER-${Date.now()}`;
+    const orderId = `ORDER-${uuidv4()}`;
+
 
     // Build base booking data
     const bookingData = {
@@ -377,7 +388,7 @@ export const bookFlight = async (req, res, next) => {
         price_currency: "aud",
         pay_currency: "btc",
         order_id: orderId,
-        ipn_callback_url: "https://yourdomain.com/api/ipn",
+        ipn_callback_url: "https://travey-backend.vercel.app/api/user/confirmPayment",
         success_url: "https://yourdomain.com/payment-success",
         cancel_url: "https://yourdomain.com/payment-cancel"
       },
@@ -387,7 +398,7 @@ export const bookFlight = async (req, res, next) => {
           "Content-Type": "application/json"
         }
       }
-    );
+    );  
 
     console.log("NOWPayments response:", nowRes.data);
 
@@ -416,6 +427,42 @@ export const bookFlight = async (req, res, next) => {
     });
   }
 };
+export const confirmPayment = async (req, res, next) => {
+  try {
+    const { order_id, payment_status } = req.body;
+console.log(req.body,"body>>>>>>>>.");
+
+    if (!order_id || payment_status !== 'finished') {
+      return res.status(400).json({ success: false, message: 'Invalid or incomplete payment data' });
+    }
+
+    const booking = await bookingModel.findOne({ orderId: order_id });
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: 'Booking not found',
+      });
+    }
+
+    booking.paymentStatus = 'confirmed';
+    await booking.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Payment confirmed successfully',
+    });
+  } catch (error) {
+    console.error('IPN error:', error.message);
+    res.status(500).json({
+      success: false,
+      message: 'Payment confirmation failed',
+      error: error.message
+    });
+  }
+};
+
+
 // export const flightOffers = async (req, res, next) => {
 //   try {
 //     // ✅ Get valid token (will refresh if needed)
