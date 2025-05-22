@@ -2874,6 +2874,65 @@ export const register = async (req, res, next) => {
     next(error);
   }
 };
+export const verifyOtp = async (req, res, next) => {
+  try {
+    const { email, otpCode } = req.body;
+
+    if (!email || !otpCode) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and OTP code are required.",
+      });
+    }
+
+    const user = await usersModel.findOne({ email, isDeleted: false });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    if (user.isOtpVerified) {
+      return res.status(400).json({
+        success: false,
+        message: "OTP already verified.",
+      });
+    }
+
+    // Check if OTP is expired (e.g., 10 minutes validity)
+    const now = new Date();
+    const expiryTime = new Date(user.otpGenerateTimeDate);
+    expiryTime.setMinutes(expiryTime.getMinutes() + 10);
+
+    if (now > expiryTime) {
+      return res.status(400).json({
+        success: false,
+        message: "OTP has expired. Please request a new one.",
+      });
+    }
+
+    if (user.otpCode !== Number(otpCode)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid OTP code.",
+      });
+    }
+
+    // Update user OTP verification status
+    user.isOtpVerified = true;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP verified successfully.",
+    });
+  } catch (error) {
+    console.error("OTP verification error:", error);
+    next(error);
+  }
+};
 
 export const login = async (req, res, next) => {
   try {
@@ -2890,7 +2949,6 @@ export const login = async (req, res, next) => {
 
     // Compare password
     const isMatch = await compare(password, user.password);
-
     if (!isMatch) {
       return res.status(401).json({
         success: false,
@@ -2898,8 +2956,16 @@ export const login = async (req, res, next) => {
       });
     }
 
+    // Check if OTP is verified
+    if (!user.isOtpVerified) {
+      return res.status(403).json({
+        success: false,
+        message: 'OTP not verified. Please verify your email before logging in.',
+      });
+    }
+
     // Generate JWT Token
-    const token = generateToken(user)
+    const token = generateToken(user);
 
     return res.status(200).json({
       success: true,
@@ -2907,6 +2973,132 @@ export const login = async (req, res, next) => {
       data: { user, token },
     });
   } catch (error) {
+    next(error);
+  }
+};
+export const forgetPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ success: false, message: "Email is required." });
+    }
+
+    const user = await usersModel.findOne({ email, isDeleted: false });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found." });
+    }
+
+    // Generate OTP
+    const otpCode = Math.floor(100000 + Math.random() * 900000);
+    const otpGenerateTimeDate = new Date();
+
+    // Save OTP info
+    user.otpCode = otpCode;
+    user.otpGenerateTimeDate = otpGenerateTimeDate;
+    user.isForgetPasswordVerifiied = false;
+    await user.save();
+
+    // Send email
+    await sendEmail(email, "Password Reset OTP", `Your OTP code is ${otpCode}`);
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP sent to email for password reset.",
+    });
+  } catch (error) {
+    console.error("Forget password error:", error);
+    next(error);
+  }
+};
+export const verifyForgetPassword = async (req, res, next) => {
+  try {
+    const { email, otpCode } = req.body;
+
+    if (!email || !otpCode) {
+      return res.status(400).json({ success: false, message: "Email and OTP are required." });
+    }
+
+    const user = await usersModel.findOne({ email, isDeleted: false });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found." });
+    }
+
+    // Check if OTP is expired (e.g. 10 min)
+    const now = new Date();
+    const expiryTime = new Date(user.otpGenerateTimeDate);
+    expiryTime.setMinutes(expiryTime.getMinutes() + 10);
+
+    if (now > expiryTime) {
+      return res.status(400).json({ success: false, message: "OTP has expired." });
+    }
+
+    if (user.otpCode !== Number(otpCode)) {
+      return res.status(400).json({ success: false, message: "Invalid OTP." });
+    }
+
+    user.isForgetPasswordVerifiied = true;
+    await user.save();
+
+    return res.status(200).json({ success: true, message: "OTP verified. You can now reset your password." });
+  } catch (error) {
+    console.error("Verify forget password error:", error);
+    next(error);
+  }
+};
+export const resetPassword = async (req, res, next) => {
+  try {
+    const { email, newPassword, confirmNewPassword } = req.body;
+
+    if (!email || !newPassword || !confirmNewPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Email, new password and confirmation are required.",
+      });
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Passwords do not match.",
+      });
+    }
+
+    const user = await usersModel.findOne({ email, isDeleted: false });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    if (!user.isForgetPasswordVerifiied) {
+      return res.status(403).json({
+        success: false,
+        message: "OTP not verified for password reset.",
+      });
+    }
+
+    // Hash new password and update
+    const hashedPassword = await hash(newPassword, 10);
+    user.password = hashedPassword;
+
+    // Reset OTP flags after successful password reset
+    user.isForgetPasswordVerifiied = false;
+    user.otpCode = null;
+    user.otpGenerateTimeDate = null;
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Password reset successfully.",
+    });
+  } catch (error) {
+    console.error("Reset password error:", error);
     next(error);
   }
 };

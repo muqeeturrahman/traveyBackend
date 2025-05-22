@@ -37,6 +37,10 @@ const usersSchema = Schema(
       type: Boolean,
       default: 0,
     },
+        isForgetPasswordVerifiied: {
+      type: Boolean,
+      default: 0,
+    },
     role: {
       type: String,
         enum: ['admin','user'],
