@@ -1,5 +1,5 @@
 import express from "express"
-import { bookFlight, flightOffers, getBookings, getToken, login, register,discountPercentage, getDiscount, getBookingById, logout, deleteBookingById, confirmPayment, city, verifyOtp, forgetPassword, verifyForgetPassword, resetPassword } from "../controller/userController.js"
+import { bookFlight, flightOffers, getBookings, getToken, login, register,discountPercentage, getDiscount, getBookingById, logout, deleteBookingById, confirmPayment, city, verifyOtp, forgetPassword, verifyForgetPassword, resetPassword, createDeal, getDeals, getDealById } from "../controller/userController.js"
 import usersMiddleware from "../middleware/usersMiddleware.js"
 const userRouter = express.Router()
 userRouter.route("/getToken").post(getToken)
@@ -23,6 +23,9 @@ userRouter.route("/cities").get(city)
 
 userRouter.route("/deleteBookingById/:id").post(usersMiddleware,deleteBookingById)
 
+userRouter.route("/getDeals").get(getDeals)
+userRouter.route("/createDeal").post(createDeal)
+userRouter.route("/getDealById/:id").get(getDealById)
 
 
 
