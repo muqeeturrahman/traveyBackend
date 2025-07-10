@@ -341,7 +341,14 @@ export const bookFlight = async (req, res, next) => {
             fullName,
             email,
             phoneNumber,
-            countryCode
+            countryCode,
+            dateOfBirth,
+            gender,
+            nationality,
+            passportNumber,
+            seatPreference,
+            mealPreference,
+            extraBaggageAddOns
         } = req.body;
 
         const flightDate = new Date(date);
@@ -378,6 +385,14 @@ export const bookFlight = async (req, res, next) => {
         if (returnDate) bookingData.returnDate = returnDate;
         if (returnAirline) bookingData.returnAirline = returnAirline;
 
+
+        if (dateOfBirth) bookingData.dateOfBirth = dateOfBirth;
+        if (gender) bookingData.gender = gender;
+        if (nationality) bookingData.nationality = nationality;
+        if (passportNumber) bookingData.passportNumber = passportNumber;
+        if (seatPreference) bookingData.seatPreference = seatPreference;
+        if (mealPreference) bookingData.mealPreference = mealPreference;
+        if (extraBaggageAddOns) bookingData.extraBaggageAddOns = extraBaggageAddOns;
         // Create initial booking
         const booking = await bookingModel.create(bookingData);
 
@@ -3329,45 +3344,45 @@ export const createDeal = async (req, res, next) => {
     }
 };
 export const getDeals = async (req, res, next) => {
-  try {
-    const deals = await dealsModel.find().sort({ createdAt: -1 });
-    res.status(200).json({
-      success: true,
-      message: "All deals fetched successfully",
-      data: deals
-    });
-  } catch (error) {
-    console.error("getDeals error:", error.message);
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch deals",
-      error: error.message
-    });
-  }
+    try {
+        const deals = await dealsModel.find().sort({ createdAt: -1 });
+        res.status(200).json({
+            success: true,
+            message: "All deals fetched successfully",
+            data: deals
+        });
+    } catch (error) {
+        console.error("getDeals error:", error.message);
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch deals",
+            error: error.message
+        });
+    }
 };
 export const getDealById = async (req, res, next) => {
-  try {
-    const id = req.params.id;
+    try {
+        const id = req.params.id;
         const deal = await dealsModel.findById(id);
 
-    if (!deal) {
-      return res.status(404).json({
-        success: false,
-        message: "Deal not found"
-      });
-    }
+        if (!deal) {
+            return res.status(404).json({
+                success: false,
+                message: "Deal not found"
+            });
+        }
 
-    res.status(200).json({
-      success: true,
-      message: "Deal fetched successfully",
-      data: deal
-    });
-  } catch (error) {
-    console.error("getDealById error:", error.message);
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch deal",
-      error: error.message
-    });
-  }
+        res.status(200).json({
+            success: true,
+            message: "Deal fetched successfully",
+            data: deal
+        });
+    } catch (error) {
+        console.error("getDealById error:", error.message);
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch deal",
+            error: error.message
+        });
+    }
 };
