@@ -102,7 +102,7 @@ const bookingSchema = Schema(
         dateOfBirth: { type: Date, required: true },
         gender: { type: String, enum: ['Male', 'Female', 'Other'], required: true },
         nationality: { type: String, required: true },
-        passportNumber: { type: String, required: true },
+        passportNumber: { type: String, },
         seatPreference: { type: String, enum: ['Window', 'Aisle', 'Middle'] },
         mealPreference: { type: String, enum: ['Veg', 'Non-Veg', 'Halal', 'No Meal'], },
         extraBaggageAddOns: { type: String, }
