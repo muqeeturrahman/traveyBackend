@@ -191,7 +191,7 @@ export const flightOffers = async (req, res, next) => {
             currencyCode
 
         } = req.query;
-        console.log(req.query, ">>>>>>.")
+        console.log(currencyCode, ">>>>>>.")
 
         const page = req.query.page || 1
         const limit = req.query.limit | 10
@@ -348,7 +348,8 @@ export const bookFlight = async (req, res, next) => {
             passportNumber,
             seatPreference,
             mealPreference,
-            extraBaggageAddOns
+            extraBaggageAddOns,
+            currencyCode
         } = req.body;
 
         const flightDate = new Date(date);
@@ -401,7 +402,7 @@ export const bookFlight = async (req, res, next) => {
             "https://api.nowpayments.io/v1/invoice",
             {
                 price_amount: price,
-                price_currency: "aud",
+                price_currency: currencyCode,
                 pay_currency: "btc",
                 order_id: orderId,
                 ipn_callback_url: "https://travey-backend.vercel.app/api/user/confirmPayment",
