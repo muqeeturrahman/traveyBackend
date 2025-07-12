@@ -12,6 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { log } from "node:console"
 import dealsModel from "../models/dealsModel.js";
 import { sendEmail } from "../utilities/helpers.js"
+import contactModel from "../models/conatctForm.js"
 dotenv.config()
 
 const getAccessToken = async () => {
@@ -3382,6 +3383,30 @@ export const getDealById = async (req, res, next) => {
         res.status(500).json({
             success: false,
             message: "Failed to fetch deal",
+            error: error.message
+        });
+    }
+};
+export const contactAdmin = async (req, res, next) => {
+    try {
+        const { name, email, message } = req.body
+
+        const contact = await contactModel.create({
+            name,
+            email,
+            message
+        });
+
+        res.status(200).json({
+            success: true,
+            message: "message sent to admin successfully",
+            data: contact
+        });
+    } catch (error) {
+        console.error("error:", error.message);
+        res.status(500).json({
+            success: false,
+            message: "Failed to Send Message",
             error: error.message
         });
     }
