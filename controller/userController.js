@@ -176,8 +176,6 @@ export const flightOffers = async (req, res, next) => {
     try {
         const discount = await DiscountModel.findOne({}).sort({ createdAt: -1 })
 
-
-
         const {
             originLocationCode,
             destinationLocationCode,
@@ -375,7 +373,8 @@ export const bookFlight = async (req, res, next) => {
             fullName,
             email,
             phoneNumber,
-            countryCode
+            countryCode,
+            currencyCode
         };
 
         // Conditionally add optional fields

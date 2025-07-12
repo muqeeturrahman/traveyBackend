@@ -105,7 +105,9 @@ const bookingSchema = Schema(
         passportNumber: { type: String, },
         seatPreference: { type: String, enum: ['Window', 'Aisle', 'Middle'] },
         mealPreference: { type: String, enum: ['Veg', 'Non-Veg', 'Halal', 'No Meal'], },
-        extraBaggageAddOns: { type: String, }
+        extraBaggageAddOns: { type: String, },
+        currencyCode: { type: String, }
+
     },
     {
         timestamps: true
