@@ -6,6 +6,7 @@ import mongoose from "mongoose";
 import http from "http";
 import cors from "cors";
 import userRouter from "./routes/user.js";
+import paypalRouter from './routes/paypal.js';
 
 // import { userRouter } from "./routes/user.js";
 
@@ -62,6 +63,7 @@ app.get('/',(req,res,next)=>{
   })
 })
 app.use("/api/user", userRouter);
+app.use('/api/paypal', paypalRouter);
 
 
 mongoose
