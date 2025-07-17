@@ -47,6 +47,9 @@ const bookingSchema = Schema(
         paymentId: {
             type: String
         },
+        paymentMethod: {
+            type: String
+        },
         orderId: {
             type: String
         },
