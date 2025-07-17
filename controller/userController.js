@@ -13,6 +13,8 @@ import { log } from "node:console"
 import dealsModel from "../models/dealsModel.js";
 import { sendEmail } from "../utilities/helpers.js"
 import contactModel from "../models/conatctForm.js"
+import { client, checkoutNodeJssdk } from '../paypalClient.js';
+
 dotenv.config()
 
 const getAccessToken = async () => {
@@ -315,135 +317,110 @@ export const getToken = async (req, res, next) => {
     }
 };
 
-export const bookFlight = async (req, res, next) => {
+export const bookFlight = async (req, res) => {
     try {
-        const {
-            from,
-            to,
-            price,
-            date,
-            time,
-            duration,
-            stops,
-            travelClass,
-            checkedBags,
-            cabinBags,
-            paymentStatus,
-            paymentId,
-            adults,
-            infants,
-            children,
-            departureDate,
-            returnDate,
-            departureAirline,
-            returnAirline,
-            fullName,
-            email,
-            phoneNumber,
-            countryCode,
-            dateOfBirth,
-            gender,
-            nationality,
-            passportNumber,
-            seatPreference,
-            mealPreference,
-            extraBaggageAddOns,
-            currencyCode
-        } = req.body;
-
-        const flightDate = new Date(date);
-        const flightTime = new Date(time);
-        const orderId = `ORDER-${uuidv4()}`;
-
-
-        // Build base booking data
-        const bookingData = {
-            from,
-            to,
-            price,
-            date: flightDate,
-            time: flightTime,
-            duration,
-            stops,
-            travelClass,
-            checkedBags,
-            cabinBags,
-            paymentStatus: paymentStatus || "pending",
-            departureDate,
-            departureAirline,
-            fullName,
-            email,
-            phoneNumber,
-            countryCode,
-            currencyCode
-        };
-
-        // Conditionally add optional fields
-        if (paymentId) bookingData.paymentId = paymentId;
-        if (adults !== undefined) bookingData.adults = adults;
-        if (infants !== undefined) bookingData.infants = infants;
-        if (children !== undefined) bookingData.children = children;
-        if (returnDate) bookingData.returnDate = returnDate;
-        if (returnAirline) bookingData.returnAirline = returnAirline;
-
-
-        if (dateOfBirth) bookingData.dateOfBirth = dateOfBirth;
-        if (gender) bookingData.gender = gender;
-        if (nationality) bookingData.nationality = nationality;
-        if (passportNumber) bookingData.passportNumber = passportNumber;
-        if (seatPreference) bookingData.seatPreference = seatPreference;
-        if (mealPreference) bookingData.mealPreference = mealPreference;
-        if (extraBaggageAddOns) bookingData.extraBaggageAddOns = extraBaggageAddOns;
-        // Create initial booking
-        const booking = await bookingModel.create(bookingData);
-
-        // Call NOWPayments to create invoice
+      const {
+        from, to, price, date, time, duration, stops, travelClass,
+        checkedBags, cabinBags, paymentMethod, adults, infants, children,
+        departureDate, returnDate, departureAirline, returnAirline,
+        fullName, email, phoneNumber, countryCode, dateOfBirth, gender,
+        nationality, passportNumber, seatPreference, mealPreference,
+        extraBaggageAddOns, currencyCode
+      } = req.body;
+  
+      const flightDate = new Date(date);
+      const flightTime = new Date(time);
+      const orderId = `ORDER-${uuidv4()}`;
+  
+      // Save booking to DB
+      const bookingData = {
+        from, to, price, date: flightDate, time: flightTime,
+        duration, stops, travelClass, checkedBags, cabinBags,
+        paymentStatus: "pending", departureDate, departureAirline,
+        fullName, email, phoneNumber, countryCode, currencyCode,
+        paymentMethod, adults, infants, children, returnDate,
+        returnAirline, dateOfBirth, gender, nationality, passportNumber,
+        seatPreference, mealPreference, extraBaggageAddOns
+      };
+  
+      const booking = await bookingModel.create(bookingData);
+  
+      // Handle payment based on method
+      let paymentUrl = "";
+      let paymentId = "";
+  
+      if (paymentMethod === "nowpayments") {
         const nowRes = await axios.post(
-            "https://api.nowpayments.io/v1/invoice",
-            {
-                price_amount: price,
-                price_currency: currencyCode,
-                pay_currency: "btc",
-                order_id: orderId,
-                ipn_callback_url: "https://travey-backend.vercel.app/api/user/confirmPayment",
-                success_url: "https://yourdomain.com/payment-success",
-                cancel_url: "https://yourdomain.com/payment-cancel"
-            },
-            {
-                headers: {
-                    "x-api-key": process.env.NOWPAYMENTS_API_KEY,
-                    "Content-Type": "application/json"
-                }
+          "https://api.nowpayments.io/v1/invoice",
+          {
+            price_amount: price,
+            price_currency: currencyCode,
+            pay_currency: "btc",
+            order_id: orderId,
+            ipn_callback_url: "https://travey-backend.vercel.app/api/user/confirmPayment",
+            success_url: "https://yourdomain.com/payment-success",
+            cancel_url: "https://yourdomain.com/payment-cancel"
+          },
+          {
+            headers: {
+              "x-api-key": process.env.NOWPAYMENTS_API_KEY,
+              "Content-Type": "application/json"
             }
+          }
         );
-
-        console.log("NOWPayments response:", nowRes.data);
-
-        // Update booking with payment details
-        booking.paymentId = nowRes.data.payment_id;
-        booking.paymentStatus = nowRes.data.payment_status || "waiting";
-        booking.orderId = orderId;
-        await booking.save();
-
-        // Send response
-        res.status(201).json({
-            success: true,
-            message: "Flight booked, awaiting payment",
-            data: {
-                booking,
-                payment_url: nowRes.data.invoice_url
-            }
+  
+        paymentUrl = nowRes.data.invoice_url;
+        paymentId = nowRes.data.payment_id;
+  
+      } else if (paymentMethod === "paypal") {
+        const request = new checkoutNodeJssdk.orders.OrdersCreateRequest();
+        request.prefer('return=representation');
+        request.requestBody({
+          intent: 'CAPTURE',
+          purchase_units: [{ amount: { currency_code: currencyCode, value: price.toString() } }],
+          application_context: {
+            brand_name: 'FlightOnBudget',
+            landing_page: 'BILLING',
+            user_action: 'PAY_NOW',
+            return_url: "https://www.flightonbudget.com/checkout-success",
+            cancel_url: "https://www.flightonbudget.com/checkout-cancel"
+          }
         });
-
+  
+        const order = await client().execute(request);
+        const approvalUrl = order.result.links.find(link => link.rel === "approve")?.href;
+  
+        if (!approvalUrl) {
+          return res.status(500).json({ message: "PayPal approval URL not found" });
+        }
+  
+        paymentUrl = approvalUrl;
+        paymentId = order.result.id;
+      }
+  
+      // Update booking with payment info
+      booking.paymentId = paymentId;
+      booking.orderId = orderId;
+      await booking.save();
+  
+      res.status(201).json({
+        success: true,
+        message: "Flight booked, awaiting payment",
+        data: {
+          booking,
+          payment_url: paymentUrl
+        }
+      });
+  
     } catch (error) {
-        console.error("Booking or payment error:", error.response?.data || error.message);
-        res.status(500).json({
-            success: false,
-            message: "Booking failed",
-            error: error.response?.data || error.message
-        });
+      console.error("Booking or payment error:", error.response?.data || error.message);
+      res.status(500).json({
+        success: false,
+        message: "Booking failed",
+        error: error.response?.data || error.message
+      });
     }
-};
+  };
 export const confirmPayment = async (req, res, next) => {
     try {
         const { order_id, payment_status } = req.body;

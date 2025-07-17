@@ -4,7 +4,7 @@ import dotenv from "dotenv"
 import { client, checkoutNodeJssdk } from '../paypalClient.js';
 
 export const createOrder = async (req, res) => {
-  const { value = '10.00', currency_code = 'USD' } = req.body;
+  const { value , currency_code } = req.body;
 
   const request = new checkoutNodeJssdk.orders.OrdersCreateRequest();
   request.prefer('return=representation');
@@ -19,8 +19,8 @@ export const createOrder = async (req, res) => {
       brand_name: 'Test Store',
       landing_page: 'BILLING', // Show debit/credit card form first
       user_action: 'PAY_NOW',
-      return_url: 'http://localhost:3000/checkout-success',
-      cancel_url: 'http://localhost:3000/checkout-cancel'
+      return_url: 'https://www.flightonbudget.com/checkout-success',
+      cancel_url: 'https://www.flightonbudget.com/checkout-cancel'
     }
   });
 
