@@ -2,6 +2,7 @@ import express from "express"
 import axios from "axios"
 import dotenv from "dotenv"
 import { client, checkoutNodeJssdk } from '../paypalClient.js';
+console.log("api hitting");
 
 export const createOrder = async (req, res) => {
   const { value , currency_code } = req.body;
