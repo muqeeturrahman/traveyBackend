@@ -45,16 +45,34 @@ export const createOrder = async (req, res) => {
 
 export const captureOrder = async (req, res) => {
   const { orderID } = req.body;
-  console.log(orderID,"order>>>>>>>>>");
-  console.log("api is hitting>>>>>>>>>>>>");
-  
+  console.log(orderID, "order>>>>>>>>>");
+
   const request = new checkoutNodeJssdk.orders.OrdersCaptureRequest(orderID);
   request.requestBody({});
 
   try {
     const capture = await client().execute(request);
-    const updateBooking=await bookingModel.findOneAndUpdate({paymentId:orderID},{paymentStatus:"confirmed"},{new:true})
-    res.json({ status: capture.result.status });
+    console.log(capture, "capture>>>>>>>>>>");
+
+    const result = capture.result;
+
+    if (result.status === "COMPLETED") {
+      await bookingModel.findOneAndUpdate(
+        { paymentId: orderID },
+        { paymentStatus: "confirmed" },
+        { new: true }
+      );
+    }
+
+    // Extract and format only the required data
+    const responseData = {
+      status: result.status,
+      value: parseFloat(result.purchase_units[0].payments.captures[0].amount.value),
+      currency: result.purchase_units[0].payments.captures[0].amount.currency_code
+    };
+
+    res.json(responseData);
+
   } catch (err) {
     console.error(err);
     res.status(500).send('Capture failed');
