@@ -7,7 +7,10 @@ console.log("PayPal Client Secret:", process.env.PAYPAL_CLIENT_SECRET);
 function environment() {
   let clientId = process.env.PAYPAL_CLIENT_ID;
   let clientSecret = process.env.PAYPAL_CLIENT_SECRET;
-  return new checkoutNodeJssdk.core.SandboxEnvironment(clientId, clientSecret);
+  console.log(clientId, clientSecret);
+
+  // Switch to LiveEnvironment for production
+  return new checkoutNodeJssdk.core.LiveEnvironment(clientId, clientSecret);
 }
 
 function client() {
