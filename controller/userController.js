@@ -382,8 +382,8 @@ export const bookFlight = async (req, res) => {
             brand_name: 'FlightOnBudget',
             landing_page: 'BILLING',
             user_action: 'PAY_NOW',
-            return_url: "https://www.flightonbudget.com/checkout-success",
-            cancel_url: "https://www.flightonbudget.com/checkout-cancel"
+            return_url: "http://localhost:5173/checkout-success",
+            cancel_url: "http://localhost:5173/checkout-cancel"
           }
         });
   

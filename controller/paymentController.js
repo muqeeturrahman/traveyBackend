@@ -2,6 +2,7 @@ import express from "express"
 import axios from "axios"
 import dotenv from "dotenv"
 import { client, checkoutNodeJssdk } from '../paypalClient.js';
+import bookingModel from "../models/bookingModel.js";
 console.log("api hitting");
 
 export const createOrder = async (req, res) => {
@@ -44,12 +45,15 @@ export const createOrder = async (req, res) => {
 
 export const captureOrder = async (req, res) => {
   const { orderID } = req.body;
+  console.log(orderID,"order>>>>>>>>>");
+  console.log("api is hitting>>>>>>>>>>>>");
+  
   const request = new checkoutNodeJssdk.orders.OrdersCaptureRequest(orderID);
   request.requestBody({});
 
   try {
     const capture = await client().execute(request);
-    const updateBooking=await bookingModel.findOneAndUpdate({paymentId:orderID},{paymentStatus:"confirmed"})
+    const updateBooking=await bookingModel.findOneAndUpdate({paymentId:orderID},{paymentStatus:"confirmed"},{new:true})
     res.json({ status: capture.result.status });
   } catch (err) {
     console.error(err);
