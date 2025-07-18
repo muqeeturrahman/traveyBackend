@@ -49,6 +49,7 @@ export const captureOrder = async (req, res) => {
 
   try {
     const capture = await client().execute(request);
+    const updateBooking=await bookingModel.findOneAndUpdate({paymentId:orderID},{paymentStatus:"confirmed"})
     res.json({ status: capture.result.status });
   } catch (err) {
     console.error(err);
