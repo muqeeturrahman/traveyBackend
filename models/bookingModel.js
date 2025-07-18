@@ -47,9 +47,7 @@ const bookingSchema = Schema(
         paymentId: {
             type: String
         },
-        paymentMethod: {
-            type: String
-        },
+ 
         orderId: {
             type: String
         },
@@ -101,6 +99,9 @@ const bookingSchema = Schema(
         countryCode: {
             type: Number,
             // required: true
+        },
+            paymentMethod: {
+            type: String
         },
         dateOfBirth: { type: Date, required: true },
         gender: { type: String, enum: ['Male', 'Female', 'Other'], required: true },
