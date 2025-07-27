@@ -379,7 +379,7 @@ export const bookFlight = async (req, res) => {
           intent: 'CAPTURE',
           purchase_units: [{ amount: { currency_code: currencyCode, value: price.toString() } }],
           application_context: {
-            brand_name: 'FlightOnBudget',
+            brand_name: 'PalkiTravel',
             landing_page: 'BILLING',
             user_action: 'PAY_NOW',
             return_url: "https://www.palkitravel.com/checkout-success",
