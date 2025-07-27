@@ -1,4 +1,6 @@
 import checkoutNodeJssdk from '@paypal/checkout-server-sdk';
+import dotenv from "dotenv";
+dotenv.config();
 
 // Debug: Print credentials to console (remove in production)
 console.log("PayPal Client ID:", process.env.PAYPAL_CLIENT_ID);
