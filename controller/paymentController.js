@@ -4,7 +4,6 @@ import dotenv from "dotenv"
 import { client, checkoutNodeJssdk } from '../paypalClient.js';
 import bookingModel from "../models/bookingModel.js";
 
-
 export const createOrder = async (req, res) => {
   const { value , currency_code } = req.body;
 
